@@ -1,0 +1,47 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tvMainActivityTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:gravity="center"
+        android:textSize="30sp"
+        />
+
+
+    <TextView
+        android:id="@+id/tvMainActivityStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aplikacja umożliwiające sterowanie mobilnym robotem dwukołowym"
+        android:layout_below="@id/tvMainActivityTitle"
+        android:gravity="center"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
+        android:textSize="25sp"
+        />
+
+    <Button
+        android:id="@+id/bMainActivityConnectToServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvMainActivityStatus"
+        android:text="Połącz z aplikacją Rasbot"/>
+
+    <Button
+        android:id="@+id/bMianActivitySterring"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bMainActivityConnectToServer"
+        android:text="Steruj robotem"
+        android:enabled="false"/>
+</RelativeLayout>

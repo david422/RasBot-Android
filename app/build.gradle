@@ -1,0 +1,75 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "21.1.2"
+
+    defaultConfig {
+        applicationId "pl.dp.rasbot"
+        minSdkVersion 19
+        targetSdkVersion 19
+        versionCode 1
+        versionName "1.0"
+
+    }
+
+//    sourceSets.main {
+//        jni.srcDirs = []
+//        jniLibs.srcDir 'src/main/libs'
+//        java.srcDirs += 'src/main/jni/src'
+//    }
+//
+//    tasks.withType(Exec) {
+//
+//        def localProperties = new Properties()
+//        localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
+//        def gstDir = "/opt/gstreamer-1.0-android-arm-release-1.4.4"
+//
+//        environment = [:]
+//        environment['PATH'] = System.getenv("PATH")+ ":/usr/local/bin"
+//        environment['GSTREAMER_SDK_ROOT'] = gstDir
+//    }
+//
+//
+//    task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
+//
+//        def ndkDir = "/opt/android-ndk-r9d"
+//        commandLine "$ndkDir/ndk-build",
+//                '-C', file('src/main/jni').absolutePath,
+//                '-j', Runtime.runtime.availableProcessors(),
+//                'all',
+//                'NDK_DEBUG=1',
+//                'V=1',
+//                'APP_PLATFORM=android-19'
+//
+//    }
+//
+//    task cleanNative(type: Exec, description: 'Clean JNI object files') {
+//        def ndkDir = "/opt/android-ndk-r9d"
+//        commandLine "$ndkDir/ndk-build",
+//                '-C', file('src/main/jni').absolutePath,
+//                'clean'
+//    }
+//
+//    clean.dependsOn 'cleanNative'
+//
+//    tasks.withType(JavaCompile) {
+//        compileTask -> compileTask.dependsOn buildNative
+//    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.jakewharton:butterknife:6.1.0'
+    compile 'com.squareup:otto:1.3.6'
+    compile 'com.googlecode.gstreamer-java:gstreamer-java:1.5'
+}
