@@ -4,7 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -22,7 +22,8 @@ public class Slider extends View implements View.OnTouchListener {
     private static final int MAX_VALUE = 100;
     private Context context;
 
-    private Rect sliderRect;
+    private Paint paintBackground = new Paint();
+    private RectF sliderRect;
     private float dp;
     private int centerSlider = -1;
     private int centerView = -1;
@@ -52,7 +53,8 @@ public class Slider extends View implements View.OnTouchListener {
 
         padding = (int) (10*dp);
         maxOffsetMargin = (int) (50*dp);
-        sliderRect = new Rect();
+        sliderRect = new RectF();
+        paintBackground.setColor(Color.GRAY);
 
         setOnTouchListener(this);
     }
@@ -67,19 +69,19 @@ public class Slider extends View implements View.OnTouchListener {
             centerSlider = centerY;
             centerView = centerY;
         }
-        Paint paint = new Paint();
-        paint.setColor(Color.GRAY);
-        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paint);
+
+
+        canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paintBackground);
 
         Paint sliderPaint = new Paint();
         sliderPaint.setColor(Color.BLUE);
         sliderRect.set(0 + padding,
-                (int)(centerSlider-(30*dp) + padding),
-                canvas.getWidth()-padding,
-                (int)(centerSlider+(30*dp) - padding));
+                (int) (centerSlider - (30 * dp) + padding),
+                canvas.getWidth() - padding,
+                (int) (centerSlider + (30 * dp) - padding));
 
-//        sliderRect.set(0, 33, canvas.getWidth(), (centerY );
-        canvas.drawRect(sliderRect, sliderPaint);
+
+        canvas.drawRoundRect(sliderRect, sliderRect.height() / 2, sliderRect.height()/2, sliderPaint);
 
     }
 

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
 
     <pl.dp.rasbot.customview.Slider
         android:id="@+id/sSterringActivityLeftSlider"
@@ -16,20 +17,8 @@
 
 
 
-    <VideoView
-        android:id="@+id/vvStreamVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_toRightOf="@id/sSterringActivityLeftSlider"
-        android:layout_toLeftOf="@id/sSterringActivityRightSlider"
-        />
 
-    <SurfaceView
-        android:id="@+id/surfView"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_toRightOf="@id/sSterringActivityLeftSlider"
-        android:layout_toLeftOf="@id/sSterringActivityRightSlider" />
+
 
     <TextView
         android:id="@+id/tvSterringActivityLeftValue"
@@ -48,4 +37,26 @@
         android:layout_margin="15dp"
         android:text="0 rpm"
         android:layout_toLeftOf="@+id/sSterringActivityRightSlider"/>
+
+    <Button
+        android:id="@+id/bSterringActivityPlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/run_camera"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@id/sSterringActivityLeftSlider"
+        android:layout_toLeftOf="@id/sSterringActivityRightSlider"
+        />
+
+    <SurfaceView
+        android:id="@+id/surfView"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:layout_above="@id/bSterringActivityPlay"
+        android:layout_toRightOf="@id/sSterringActivityLeftSlider"
+        android:layout_toLeftOf="@id/sSterringActivityRightSlider" />
+
+
+
 </RelativeLayout>

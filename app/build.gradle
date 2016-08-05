@@ -1,13 +1,41 @@
+buildscript {
+    repositories {
+        maven { url 'https://maven.fabric.io/public' }
+    }
+
+    dependencies {
+        classpath 'io.fabric.tools:gradle:1.21.7'
+    }
+}
+/*
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}*/
+
 apply plugin: 'com.android.application'
+
+apply plugin: 'io.fabric'
+
+
+ext{
+    def localProperties = new Properties()
+    localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
+    gstDir = localProperties.getProperty("gst.dir")
+    ndkDir = localProperties.getProperty("ndk.dir")
+
+}
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion '21.1.2'
 
     defaultConfig {
         applicationId "pl.dp.rasbot"
-        minSdkVersion 19
-        targetSdkVersion 19
+        minSdkVersion 21
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
 
@@ -21,19 +49,18 @@ android {
 
     tasks.withType(Exec) {
 
-        def localProperties = new Properties()
-        localProperties.load(project.rootProject.file('local.properties').newDataInputStream())
-        def gstDir = "/opt/gstreamer-1.0-android-arm-release-1.4.4"
-
         environment = [:]
         environment['PATH'] = System.getenv("PATH")+ ":/usr/local/bin"
         environment['GSTREAMER_SDK_ROOT'] = gstDir
     }
 
+    task showVar(){
+        println("project ndk: " + ndkDir)
+        println("project gst: " + gstDir)
+    }
 
     task buildNative(type: Exec, description: 'Compile JNI source via NDK') {
 
-        def ndkDir = "/opt/android-ndk-r9d"
         commandLine "$ndkDir/ndk-build",
                 '-C', file('src/main/jni').absolutePath,
                 '-j', Runtime.runtime.availableProcessors(),
@@ -45,7 +72,6 @@ android {
     }
 
     task cleanNative(type: Exec, description: 'Clean JNI object files') {
-        def ndkDir = "/opt/android-ndk-r9d"
         commandLine "$ndkDir/ndk-build",
                 '-C', file('src/main/jni').absolutePath,
                 'clean'
@@ -64,12 +90,28 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
 }
+//configurations {
+//    compile.exclude group:'ch.qos.logback'
+//}
+
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:21.0.3'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile 'com.squareup:otto:1.3.6'
+
+    compile 'com.github.navasmdc:MaterialDesign:1.5@aar'
+
+//    compile 'com.afollestad.material-dialogs:core:0.8.6.2'
+
+    compile 'com.afollestad:material-dialogs:0.7.8.1'
+
+
     compile 'com.googlecode.gstreamer-java:gstreamer-java:1.5'
 }

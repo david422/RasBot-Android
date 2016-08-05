@@ -1,5 +1,6 @@
 package pl.dp.rasbot.connection;
 
+import android.os.Handler;
 import android.util.Log;
 
 import org.json.simple.JSONValue;
@@ -14,6 +15,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Map;
 
+import pl.dp.rasbot.MainActivity;
 import pl.dp.rasbot.utils.BusProvider;
 
 /**
@@ -35,6 +37,7 @@ public class ConnectionManager {
 
     private static ConnectionManager mConnectionManagerInstance;
     private Thread communicationThread;
+    private Handler handler;
 
     public static ConnectionManager getInstance() {
         if (mConnectionManagerInstance == null) {
@@ -57,15 +60,19 @@ public class ConnectionManager {
 
 
                     while (!wifiSocket.isConnected());
-                    BusProvider.getInstance().post("Connected");
+//                    BusProvider.getInstance().post(MainActivity.ACTION_APPLICATION_CONNECTED);
+
+
+                    if (handler!= null)
+                        handler.sendEmptyMessage(MainActivity.ACTION_APPLICATION_CONNECTED);
 
                     dataPrintWriter = new PrintWriter(new BufferedWriter(
                             new OutputStreamWriter(wifiSocket.getOutputStream())),
-                            true);
+                            false);
 
-                    CommunicationThread commThread = new CommunicationThread(wifiSocket);
-                    communicationThread = new Thread(commThread);
-                    communicationThread.start();
+//                    CommunicationThread commThread = new CommunicationThread(wifiSocket);
+//                    communicationThread = new Thread(commThread);
+//                    communicationThread.start();
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -123,7 +130,16 @@ public class ConnectionManager {
     }
 
     public void sendMessage(Map<String, String> data) {
-        dataPrintWriter.println(JSONValue.toJSONString(data));
+        if (dataPrintWriter!= null) {
+            Log.d(TAG, "send data:" + JSONValue.toJSONString(data)
+                    + ", time:" + (System.currentTimeMillis() / 1000));
+            dataPrintWriter.println(JSONValue.toJSONString(data));
+            dataPrintWriter.flush();
+        }
+    }
+
+    public void setHandler(Handler handler) {
+        this.handler = handler;
     }
 
 

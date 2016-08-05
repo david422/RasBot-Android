@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="pl.dp.rasbot" >
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -21,6 +24,11 @@
         </activity>
         <activity android:name=".SterringActivity"
             android:screenOrientation="landscape"/>
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="c44f4165fda598b10b8f373f11d0822acb692304" />
+
+        <service android:name=".ConnectionService"/>
     </application>
 
 </manifest>

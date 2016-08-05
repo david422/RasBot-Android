@@ -1,23 +1,29 @@
 package pl.dp.rasbot;
 
 import android.app.Activity;
-import android.media.MediaPlayer;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.TextView;
-import android.widget.VideoView;
 
-import java.io.IOException;
+import com.gstreamer.GStreamer;
+
+import java.io.DataOutputStream;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
-import pl.dp.rasbot.connection.ConnectionManager;
+import butterknife.OnClick;
 import pl.dp.rasbot.customview.Slider;
 
 /**
@@ -37,11 +43,7 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
     @InjectView(R.id.tvSterringActivityRightValue)
     TextView mRightValueTextView;
 
-    @InjectView(R.id.vvStreamVideo)
-    VideoView mStreamVideoView;
 
-    private SurfaceHolder mSurfaceHolder;
-    private MediaPlayer mediaPlayer;
 
     @InjectView(R.id.surfView)
     SurfaceView mSurfaceView;
@@ -55,17 +57,23 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
     private native void nativeSurfaceFinalize();
     private long native_custom_data;      // Native code will use this to keep private data
 
-    private String streamAddress = "http://192.168.42.136:8160";
 
-    private ConnectionManager mConnectionManager;
+    private ConnectionService connectionService;
+    private boolean connectionServiceBound = false;
+
     Map<String, String> data = new HashMap<>();
 
-    private boolean is_playing_desired;   // Whether the user asked to go to PLAYING
+    private boolean isPlaying = false;   // Whether the user asked to go to PLAYING
+
+    private Socket socket;
+
+    private DataOutputStream outToServer;
 
     static {
-//        System.loadLibrary("gstreamer_android");
-//        System.loadLibrary("tutorial-3");
-//        nativeClassInit();
+        System.loadLibrary("gstreamer_android");
+
+        System.loadLibrary("tutorial-3");
+        nativeClassInit();
     }
 
     @Override
@@ -73,34 +81,57 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         super.onCreate(savedInstanceState);
 
 
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.sterring_activity);
+
+        try {
+            GStreamer.init(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ButterKnife.inject(this);
 
+
         mLeftSlider.setOnSliderValueChanged(onLeftSliderChanged);
         mRightSlider.setOnSliderValueChanged(onRightSliderChanged);
 
-        mConnectionManager = ConnectionManager.getInstance();
+
 
         data.put("right_rpm", "0");
         data.put("left_rpm", "0");
+
+        SurfaceHolder sh = mSurfaceView.getHolder();
+        sh.addCallback(this);
+
 
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        mStreamVideoView.st/art();
+        try{
+            nativeInit();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        mStreamVideoView.stopPlayback();
-        if (mediaPlayer!=null)
-        mediaPlayer.stop();
+
+        if (isPlaying)
+            nativePause();
+
+        try{
+            nativeFinalize();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     Slider.OnSliderValueChanged onLeftSliderChanged = new Slider.OnSliderValueChanged() {
@@ -108,8 +139,8 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         public void onSliderValueChanged(int value) {
             mLeftValueTextView.setText(value + " rpm");
             data.put("left_rpm", String.valueOf(value));
-            if (mConnectionManager.isConnected())
-                mConnectionManager.sendMessage(data);
+            if (connectionService.isConnected())
+                connectionService.sendMessage(data);
         }
     };
 
@@ -118,64 +149,42 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         public void onSliderValueChanged(int value) {
             mRightValueTextView.setText(value + " rpm");
             data.put("right_rpm", String.valueOf(value));
-            if (mConnectionManager.isConnected())
-                mConnectionManager.sendMessage(data);
+            if (connectionService.isConnected())
+                connectionService.sendMessage(data);
         }
     };
 
 
-    SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(SurfaceHolder surfaceHolder) {
-            try {
-                mediaPlayer = new MediaPlayer();
-                mediaPlayer.setDisplay(mSurfaceHolder);
-                mediaPlayer.setDataSource(streamAddress);
-                mediaPlayer.prepare();
-                mediaPlayer.setOnPreparedListener(onPreparedListener);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
-        @Override
-        public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
-        }
-    };
-
-    MediaPlayer.OnPreparedListener onPreparedListener = new MediaPlayer.OnPreparedListener() {
-        @Override
-        public void onPrepared(MediaPlayer mediaPlayer) {
-            mediaPlayer.start();
-        }
-    };
 
     // Called from native code. Native code calls this once it has created its pipeline and
     // the main loop is running, so it is ready to accept commands.
     private void onGStreamerInitialized () {
-        Log.i("GStreamer", "Gst initialized. Restoring state, playing:" + is_playing_desired);
+        Log.i("GStreamer", "Gst initialized. Restoring state, playing:" + isPlaying);
         // Restore previous playing state
-        if (is_playing_desired) {
+        if (isPlaying) {
             nativePlay();
         } else {
             nativePause();
         }
 
-        // Re-enable buttons, now that GStreamer is initialized
-        final Activity activity = this;
-        runOnUiThread(new Runnable() {
-            public void run() {
-//                activity.findViewById(R.id.button_play).setEnabled(true);
-//                activity.findViewById(R.id.button_stop).setEnabled(true);
-            }
-        });
     }
+
+    @OnClick(R.id.bSterringActivityPlay)
+    public void onPlaylick(Button button){
+
+        if (!isPlaying) {
+            nativePlay();
+            button.setText("Zatrzymaj kamerę");
+            isPlaying = true;
+        } else {
+            nativePause();
+
+            button.setText(getString(R.string.run_camera));
+            isPlaying = false;
+        }
+    }
+
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
@@ -191,4 +200,43 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         nativeSurfaceFinalize ();
     }
+
+    // Called from native code. This sets the content of the TextView from the UI thread.
+    private void setMessage(final String message) {
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        startService();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (connectionServiceBound){
+            unbindService(serviceConnection);
+            connectionServiceBound = false;
+        }
+    }
+
+    public void startService(){
+        Intent connectionIntent = new Intent(this, ConnectionService.class);
+        bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
+
+    };
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
+            connectionServiceBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            connectionServiceBound = false;
+        }
+    };
+
 }

@@ -4,4 +4,20 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="status">Status:</string>
+    <string name="please_wait">Proszę czekać...</string>
+    <string name="search_for_rasbot_network">Szukanie sieci rasbot</string>
+    <string name="rasbot_network_has_been_found">Znaleziono sieć Rasbot...</string>
+    <string name="connect_with_rasbot_network">Połączono z siecią rasbot</string>
+    <string name="connect_with_rasbot_application">Połączono z aplikacją rasbot</string>
+    <string name="try_connect_again">Spróbuj ponownie połączyć</string>
+    <string name="go_to_sterring">Steruj robotem</string>
+    <string name="about">O aplikacji</string>
+    <string name="application_is_already_connectes">Aplikacja jest aktualnie połączona</string>
+    <string name="author">Autor: Dawid Podolak</string>
+    <string name="about_text">Dzięki tej aplikacji, możesz sterować mobilnym robotem kołowym, który został opracowany
+    na potrzeby pracy magisterskiej pt. \"Wykorzystanie mikrokomputera Raspberry PI w mobilnym robocie kołowym.\"\n
+    </string>
+    <string name="about_title">O aplikacji</string>
+    <string name="close">Zamknij</string>
+    <string name="run_camera">Uruchom kamerę</string>
 </resources>
