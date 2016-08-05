@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="15dp"
+    android:background="@android:color/white">
+
+    <TextView
+        android:id="@+id/tvWDTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tytuł"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <ProgressBar
+        android:id="@+id/pbWDProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:layout_below="@+id/tvWDTitle"
+        android:layout_marginTop="5dp"/>
+
+    <TextView
+        android:id="@+id/tvWDContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Content"
+        android:layout_toRightOf="@id/pbWDProgress"
+        android:layout_below="@+id/tvWDTitle"
+        android:layout_marginTop="5dp"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        android:layout_alignTop="@id/pbWDProgress"
+        android:layout_alignBottom="@id/pbWDProgress"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="5dp"
+        />
+</RelativeLayout>

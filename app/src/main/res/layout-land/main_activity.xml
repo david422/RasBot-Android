@@ -1,0 +1,103 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@android:color/white"
+    tools:context=".MainActivity">
+
+
+    <LinearLayout
+        android:id="@+id/llMainActivityTitleContent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="30dp"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_launcher"/>
+
+        <TextView
+            android:id="@+id/tvMainActivityTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="@string/app_name"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            android:textColor="@android:color/black"
+            android:textSize="30sp"
+            />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/tvMainActivityStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aplikacja umożliwiająca sterowanie mobilnym robotem kołowym"
+        android:gravity="center"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="40dp"
+        android:textSize="25sp"
+        android:visibility="gone"
+        />
+
+    <com.gc.materialdesign.views.ButtonRectangle
+        android:id="@+id/bMainActivityConnectToServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp"
+        android:layout_below="@+id/llMainActivityTitleContent"
+        android:text="@string/try_connect_again"
+        />
+
+    <com.gc.materialdesign.views.ButtonRectangle
+        android:id="@+id/bMianActivitySterring"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bMainActivityConnectToServer"
+        android:text="@string/go_to_sterring"
+        android:enabled="false"/>
+
+    <com.gc.materialdesign.views.ButtonRectangle
+        android:id="@+id/bMainActivityAbout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bMianActivitySterring"
+        android:text="@string/about"/>
+
+    <LinearLayout
+        android:layout_width="180dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        android:layout_alignParentRight="true">
+
+
+
+        <com.gc.materialdesign.views.ProgressBarCircularIndeterminate
+            android:id="@+id/sConnectionProgressBar"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="10dp"
+            android:layout_gravity="center_vertical"/>
+        <TextView
+            android:id="@+id/tvMainActivityConnectionStatus"
+            android:layout_width="170dp"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:textSize="15sp"
+            android:text="Szukanie sieci..."/>
+    </LinearLayout>
+
+    </RelativeLayout>
