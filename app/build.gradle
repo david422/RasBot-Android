@@ -7,13 +7,6 @@ buildscript {
         classpath 'io.fabric.tools:gradle:1.21.7'
     }
 }
-/*
-allprojects {
-    repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
-    }
-}*/
 
 apply plugin: 'com.android.application'
 
@@ -95,10 +88,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 }
-//configurations {
-//    compile.exclude group:'ch.qos.logback'
-//}
-
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
