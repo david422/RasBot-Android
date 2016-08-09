@@ -5,28 +5,23 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.gc.materialdesign.views.ButtonRectangle;
 import com.gc.materialdesign.views.ProgressBarCircularIndeterminate;
 import com.squareup.otto.Bus;
 
-import java.io.IOException;
-
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import pl.dp.rasbot.customview.WaitDialog;
 import pl.dp.rasbot.utils.RasbotWifiManager;
+import timber.log.Timber;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -76,11 +71,13 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        Timber.plant(new Timber.DebugTree());
         setContentView(R.layout.main_activity);
         ButterKnife.inject(this);
 
-        rasbotWifiManager = new RasbotWifiManager(this);
-        rasbotWifiManager.setHandler(handler);
+//        rasbotWifiManager = new RasbotWifiManager(this);
+//        rasbotWifiManager.setHandler(handler);
 
         try {
             dialog = new MaterialDialog.Builder(this)
@@ -91,13 +88,33 @@ public class MainActivity extends ActionBarActivity {
         }catch (Exception e){
             dialog = new WaitDialog(this, getString(R.string.please_wait), getString(R.string.search_for_rasbot_network));
         }
-        mConnectingButton.setRippleSpeed(250);
-        mSterringButton.setRippleSpeed(250);
-        mSterringButton.setEnabled(false);
-        mAboutButton.setRippleSpeed(250);
+//        mConnectingButton.setRippleSpeed(250);
+//        mSterringButton.setRippleSpeed(250);
+//        mSterringButton.setEnabled(false);
+//        mAboutButton.setRippleSpeed(250);
+
+        mAboutButton = (ButtonRectangle) findViewById(R.id.bMainActivityAbout);
+        mConnectingButton = (ButtonRectangle) findViewById(R.id.bMainActivityConnectToServer);
+        mConnectionStatus = (TextView) findViewById(R.id.tvMainActivityStatus);
+        mSterringButton = (ButtonRectangle) findViewById(R.id.bMianActivitySterring);
+
+        mAboutButton.setOnClickListener(v -> about());
+        mSterringButton.setOnClickListener(v -> sterring());
+        mConnectingButton.setOnClickListener( v -> connect());
+
+        progressBarCircularIndeterminate = (ProgressBarCircularIndeterminate) findViewById(R.id.sConnectionProgressBar);
+
+
+        startService();
     }
 
-    Handler handler = new Handler() {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopService(new Intent(this, ConnectionService.class));
+    }
+
+    /* Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             int status = msg.what;
@@ -147,7 +164,7 @@ public class MainActivity extends ActionBarActivity {
 
             }
         }
-    };
+    };*/
 
     private void setDialogContent(int content){
         if (dialog instanceof MaterialDialog){
@@ -159,7 +176,7 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onResume() {
-        if (!isRasbotAppConnection) {
+        /*if (!isRasbotAppConnection) {
             rasbotWifiManager.onResume();
             if (!rasbotWifiManager.isRasbotConnection()) {
                 rasbotWifiManager.searchForRasbotNetwork();
@@ -167,16 +184,16 @@ public class MainActivity extends ActionBarActivity {
 
 
             dialog.show();
-        }
+        }*/
         super.onResume();
     }
 
     @Override
     protected void onPause() {
-        if (rasbotWifiManager != null && !isRasbotAppConnection) {
+        /*if (rasbotWifiManager != null && !isRasbotAppConnection) {
             rasbotWifiManager.onPause();
             rasbotWifiManager.stopScanning();
-        }
+        }*/
         super.onPause();
     }
 
@@ -184,15 +201,15 @@ public class MainActivity extends ActionBarActivity {
     @OnClick(R.id.bMainActivityConnectToServer)
     public void connect(){
 
+        connectionService.connect();
 
 
-
-        if (!isRasbotAppConnection){
+        /*if (!isRasbotAppConnection){
             rasbotWifiManager.searchForRasbotNetwork();
             dialog.show();
         }else{
             Toast.makeText(this, R.string.application_is_already_connectes, Toast.LENGTH_LONG).show();
-        }
+        }*/
     }
 
 
@@ -209,12 +226,7 @@ public class MainActivity extends ActionBarActivity {
                 .customView(R.layout.about_dialog, true)
                 .positiveText(R.string.close)
                 .show();
-    }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        startService();
     }
 
     @Override
@@ -230,6 +242,7 @@ public class MainActivity extends ActionBarActivity {
     public void startService(){
         Intent connectionIntent = new Intent(this, ConnectionService.class);
         bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
+        startService(connectionIntent);
 
     };
 
@@ -238,7 +251,6 @@ public class MainActivity extends ActionBarActivity {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
             connectionServiceBound = true;
-            connectionService.setHandler(handler);
         }
 
         @Override
