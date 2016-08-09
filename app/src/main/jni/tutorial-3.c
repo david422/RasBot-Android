@@ -156,11 +156,11 @@ static void *app_function (void *userdata) {
   g_main_context_push_thread_default(data->context);
 
   /* Build pipeline */
-  //data->pipeline = gst_parse_launch("videotestsrc ! warptv ! ffmpegcolorspace ! autovideosink", &error);
+  data->pipeline = gst_parse_launch("videotestsrc ! warptv ! ffmpegcolorspace ! autovideosink", &error);
 
 //  data->pipeline = gst_parse_launch("udpsrc port=8554 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, sprop-parameter-sets=\\\"J2QAFKwrQLj/LwDxImo\\\\=\\\\,KO4fLA\\\\=\\\\=\\\"\", payload=96\" ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
 //  data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink sync=false", &error);
-  data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
+  //data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
 
   if (error) {
     gchar *message = g_strdup_printf("Unable to build pipeline: %s", error->message);
@@ -333,7 +333,7 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     __android_log_print (ANDROID_LOG_ERROR, "tutorial-3", "Could not retrieve JNIEnv");
     return 0;
   }
-  jclass klass = (*env)->FindClass (env, "pl/dp/rasbot/SterringActivity");
+  jclass klass = (*env)->FindClass (env, "pl/dp/rasbot/streaming/StreamingManager");
   (*env)->RegisterNatives (env, klass, native_methods, G_N_ELEMENTS(native_methods));
 
   pthread_key_create (&current_jni_env, detach_current_thread);
