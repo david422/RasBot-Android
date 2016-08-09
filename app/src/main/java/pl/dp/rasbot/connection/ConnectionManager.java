@@ -1,9 +1,6 @@
 package pl.dp.rasbot.connection;
 
-import android.os.Handler;
 import android.util.Log;
-
-import org.json.simple.JSONValue;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,9 +10,9 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Map;
 
-import pl.dp.rasbot.MainActivity;
+import pl.dp.rasbot.message.Message;
+
 
 /**
  * Created by Project4You S.C. on 02.05.15.
@@ -79,11 +76,11 @@ public class ConnectionManager {
     }
 
 
-    public void sendMessage(Map<String, String> data) {
+    public void sendMessage(Message data) {
         if (dataPrintWriter!= null) {
-            Log.d(TAG, "send data:" + JSONValue.toJSONString(data)
+            Log.d(TAG, "send data:" + data.getJsonString()
                     + ", time:" + (System.currentTimeMillis() / 1000));
-            dataPrintWriter.println(JSONValue.toJSONString(data));
+            dataPrintWriter.println(data.getJsonString());
             dataPrintWriter.flush();
         }
     }

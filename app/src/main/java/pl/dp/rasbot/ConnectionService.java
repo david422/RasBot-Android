@@ -6,16 +6,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
-import java.util.Map;
-
 import pl.dp.rasbot.connection.ConnectionManager;
 import pl.dp.rasbot.connection.MessageCallback;
 import pl.dp.rasbot.connection.PingCallback;
 import pl.dp.rasbot.connection.PingManager;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.event.MessageEvent;
+import pl.dp.rasbot.message.Message;
 import pl.dp.rasbot.utils.BusProvider;
-import pl.dp.rasbot.utils.RasbotWifiManager;
 import timber.log.Timber;
 
 /**
@@ -45,7 +43,7 @@ public class ConnectionService extends Service implements PingCallback, MessageC
         return connectionManager.isConnected();
     }
 
-    public void sendMessage(Map<String, String> data) {
+    public void sendMessage(Message data) {
         connectionManager.sendMessage(data);
     }
 

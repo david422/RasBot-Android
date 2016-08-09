@@ -21,6 +21,8 @@ import butterknife.ButterKnife;
 import butterknife.BindView;
 import butterknife.OnClick;
 import pl.dp.rasbot.customview.Slider;
+import pl.dp.rasbot.message.LeftControl;
+import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
 
 /**
@@ -48,7 +50,6 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
     private ConnectionService connectionService;
     private boolean connectionServiceBound = false;
 
-    Map<String, String> data = new HashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,15 +69,10 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         mLeftSlider.setOnSliderValueChanged(onLeftSliderChanged);
         mRightSlider.setOnSliderValueChanged(onRightSliderChanged);
 
-
-
-        data.put("right_rpm", "0");
-        data.put("left_rpm", "0");
-
         SurfaceHolder sh = mSurfaceView.getHolder();
         sh.addCallback(this);
 
-
+        startService();
     }
 
     @Override
@@ -91,13 +87,22 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
 
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (connectionServiceBound){
+            unbindService(serviceConnection);
+            connectionServiceBound = false;
+        }
+    }
+
     Slider.OnSliderValueChanged onLeftSliderChanged = new Slider.OnSliderValueChanged() {
         @Override
         public void onSliderValueChanged(int value) {
             mLeftValueTextView.setText(value + " rpm");
-            data.put("left_rpm", String.valueOf(value));
-            if (connectionService.isConnected())
-                connectionService.sendMessage(data);
+            if (connectionService.isConnected()){
+                connectionService.sendMessage(new LeftControl(value));
+            }
         }
     };
 
@@ -105,14 +110,10 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         @Override
         public void onSliderValueChanged(int value) {
             mRightValueTextView.setText(value + " rpm");
-            data.put("right_rpm", String.valueOf(value));
             if (connectionService.isConnected())
-                connectionService.sendMessage(data);
+                connectionService.sendMessage(new RightControl(value));
         }
     };
-
-
-
 
 
 
@@ -144,28 +145,11 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         streamingManager.release();
     }
 
-
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        startService();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (connectionServiceBound){
-            unbindService(serviceConnection);
-            connectionServiceBound = false;
-        }
-    }
-
     public void startService(){
         Intent connectionIntent = new Intent(this, ConnectionService.class);
         bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
 
-    };
+    }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
