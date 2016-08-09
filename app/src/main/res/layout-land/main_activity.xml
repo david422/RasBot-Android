@@ -1,6 +1,5 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:materialdesign="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -8,6 +7,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@android:color/white"
+    android:id="@+id/rlMainActivityContainer"
     tools:context=".MainActivity">
 
 
@@ -52,28 +52,31 @@
         android:visibility="gone"
         />
 
-    <com.gc.materialdesign.views.ButtonRectangle
+    <Button
         android:id="@+id/bMainActivityConnectToServer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="0dp"
         android:layout_below="@+id/llMainActivityTitleContent"
         android:text="@string/try_connect_again"
+        android:layout_marginBottom="20dp"
         />
 
-    <com.gc.materialdesign.views.ButtonRectangle
+    <Button
         android:id="@+id/bMianActivitySterring"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/bMainActivityConnectToServer"
         android:text="@string/go_to_sterring"
+        android:layout_marginBottom="20dp"
         android:enabled="false"/>
 
-    <com.gc.materialdesign.views.ButtonRectangle
+    <Button
         android:id="@+id/bMainActivityAbout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/bMianActivitySterring"
+        android:layout_marginBottom="20dp"
         android:text="@string/about"/>
 
     <LinearLayout
@@ -85,7 +88,7 @@
 
 
 
-        <com.gc.materialdesign.views.ProgressBarCircularIndeterminate
+        <ProgressBar
             android:id="@+id/sConnectionProgressBar"
             android:layout_width="25dp"
             android:layout_height="25dp"

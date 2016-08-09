@@ -5,6 +5,14 @@
         <!-- Customize your theme here. -->
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="buttonStyle">@style/RasbotButton</item>
+        <item name="android:buttonStyle">@style/RasbotButton</item>
     </style>
+
+    <style name="RasbotButton" parent="Base.Widget.AppCompat.Button">
+        <item name="android:background">@drawable/button_bg</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 
 </resources>

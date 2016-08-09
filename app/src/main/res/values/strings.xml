@@ -20,4 +20,8 @@
     <string name="about_title">O aplikacji</string>
     <string name="close">Zamknij</string>
     <string name="run_camera">Uruchom kamerę</string>
+    <string name="connection_interrupted">Połączenie przerwane</string>
+    <string name="connection_timeout">Timeout</string>
+    <string name="connection_error">Błąd połączenia</string>
+    <string name="connecting">Łączenie</string>
 </resources>

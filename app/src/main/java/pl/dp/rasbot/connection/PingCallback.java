@@ -9,5 +9,7 @@ public interface PingCallback {
 
     public void connectionInterrupted();
 
+    public void connectionError();
+
     public void connectionTimeout();
 }

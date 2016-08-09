@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
+import butterknife.BindView;
 import butterknife.OnClick;
 import pl.dp.rasbot.customview.Slider;
 
@@ -34,18 +34,18 @@ import pl.dp.rasbot.customview.Slider;
  */
 public class SterringActivity extends Activity implements SurfaceHolder.Callback{
 
-    @InjectView(R.id.sSterringActivityLeftSlider)
+    @BindView(R.id.sSterringActivityLeftSlider)
     Slider mLeftSlider;
-    @InjectView(R.id.sSterringActivityRightSlider)
+    @BindView(R.id.sSterringActivityRightSlider)
     Slider mRightSlider;
-    @InjectView(R.id.tvSterringActivityLeftValue)
+    @BindView(R.id.tvSterringActivityLeftValue)
     TextView mLeftValueTextView;
-    @InjectView(R.id.tvSterringActivityRightValue)
+    @BindView(R.id.tvSterringActivityRightValue)
     TextView mRightValueTextView;
 
 
 
-    @InjectView(R.id.surfView)
+    @BindView(R.id.surfView)
     SurfaceView mSurfaceView;
 
     private native void nativeInit();     // Initialize native code, build pipeline, etc
@@ -93,7 +93,7 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
 
         mLeftSlider = (Slider) findViewById(R.id.sSterringActivityLeftSlider);

@@ -48,6 +48,7 @@ public class PingManager implements PingCommandCallback {
             try {
                 connectToPingServer();
             } catch (IOException e) {
+                pingCallback.connectionError();
                 e.printStackTrace();
             }
         });
@@ -60,10 +61,6 @@ public class PingManager implements PingCommandCallback {
 
     public void connectToPingServer() throws IOException {
         pingSocket = new Socket(host, port);
-
-//        SocketAddress socketAddress = new InetSocketAddress(host, port);
-
-//        pingSocket.connect(socketAddress, SOCKET_TIMEOUT);
 
         while (!pingSocket.isConnected());
 

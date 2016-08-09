@@ -6,8 +6,8 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.TextView;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import pl.dp.rasbot.R;
 
 /**
@@ -18,10 +18,10 @@ import pl.dp.rasbot.R;
  */
 public class WaitDialog extends Dialog {
 
-    @InjectView(R.id.tvWDTitle)
+    @BindView(R.id.tvWDTitle)
     TextView titleTextView;
 
-    @InjectView(R.id.tvWDContent)
+    @BindView(R.id.tvWDContent)
     TextView contentTextView;
 
     private String title, content;
@@ -37,7 +37,7 @@ public class WaitDialog extends Dialog {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.wait_dialog);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
         titleTextView.setText(title);
         contentTextView.setText(content);

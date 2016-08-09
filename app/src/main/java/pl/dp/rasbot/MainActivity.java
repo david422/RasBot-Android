@@ -6,54 +6,57 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v7.app.ActionBarActivity;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.gc.materialdesign.views.ButtonRectangle;
-import com.gc.materialdesign.views.ProgressBarCircularIndeterminate;
-import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
 
+import java.util.concurrent.TimeUnit;
+
+import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
-import pl.dp.rasbot.customview.WaitDialog;
-import pl.dp.rasbot.utils.RasbotWifiManager;
+import pl.dp.rasbot.event.ConnectionStatusEvent;
+import pl.dp.rasbot.utils.BusProvider;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
-    @InjectView(R.id.tvMainActivityStatus)
+    @BindView(R.id.rlMainActivityContainer)
+    RelativeLayout containerRelativeLayout;
+    private CompositeSubscription compositeSubscription = new CompositeSubscription();
+
+    @BindView(R.id.tvMainActivityStatus)
     TextView mStatusTextView;
 
-    @InjectView(R.id.bMianActivitySterring)
-    ButtonRectangle mSterringButton;
+    @BindView(R.id.bMianActivitySterring)
+    Button mSterringButton;
 
-    @InjectView(R.id.bMainActivityConnectToServer)
-    ButtonRectangle mConnectingButton;
+    @BindView(R.id.bMainActivityConnectToServer)
+    Button mConnectingButton;
 
-    @InjectView(R.id.bMainActivityAbout)
-    ButtonRectangle mAboutButton;
+    @BindView(R.id.bMainActivityAbout)
+    Button mAboutButton;
 
-    @InjectView(R.id.tvMainActivityConnectionStatus)
+    @BindView(R.id.tvMainActivityConnectionStatus)
     TextView mConnectionStatus;
 
-    @InjectView(R.id.sConnectionProgressBar)
-    ProgressBarCircularIndeterminate progressBarCircularIndeterminate;
+    @BindView(R.id.sConnectionProgressBar)
+    ProgressBar progressBarCircularIndeterminate;
 
+    private Snackbar snackbar;
 
-
-    private Bus bus;
-
-    public static final int ACTION_RASBOT_DISCOVERED = 0;
-    public static final int ACTION_NETWORK_CONNECTED = 1;
-    public static final int ACTION_NETWORK_DISCONNECTED = 3;
-    public static final int ACTION_APPLICATION_CONNECTED = 2;
-
-    private boolean isRasbotAppConnection = false;
 
     private ConnectionService connectionService;
     private boolean connectionServiceBound = false;
@@ -63,7 +66,6 @@ public class MainActivity extends ActionBarActivity {
      */
     private Dialog dialog;
 
-    private RasbotWifiManager rasbotWifiManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,153 +76,89 @@ public class MainActivity extends ActionBarActivity {
 
         Timber.plant(new Timber.DebugTree());
         setContentView(R.layout.main_activity);
-        ButterKnife.inject(this);
+        ButterKnife.bind(this);
 
-//        rasbotWifiManager = new RasbotWifiManager(this);
-//        rasbotWifiManager.setHandler(handler);
 
-        try {
-            dialog = new MaterialDialog.Builder(this)
-                    .title(getString(R.string.please_wait))
-                    .content(getString(R.string.search_for_rasbot_network))
-                    .progress(true, 0)
-                    .build();
-        }catch (Exception e){
-            dialog = new WaitDialog(this, getString(R.string.please_wait), getString(R.string.search_for_rasbot_network));
-        }
-//        mConnectingButton.setRippleSpeed(250);
-//        mSterringButton.setRippleSpeed(250);
-//        mSterringButton.setEnabled(false);
-//        mAboutButton.setRippleSpeed(250);
-
-        mAboutButton = (ButtonRectangle) findViewById(R.id.bMainActivityAbout);
-        mConnectingButton = (ButtonRectangle) findViewById(R.id.bMainActivityConnectToServer);
-        mConnectionStatus = (TextView) findViewById(R.id.tvMainActivityStatus);
-        mSterringButton = (ButtonRectangle) findViewById(R.id.bMianActivitySterring);
-
-        mAboutButton.setOnClickListener(v -> about());
-        mSterringButton.setOnClickListener(v -> sterring());
-        mConnectingButton.setOnClickListener( v -> connect());
-
-        progressBarCircularIndeterminate = (ProgressBarCircularIndeterminate) findViewById(R.id.sConnectionProgressBar);
+        dialog = new MaterialDialog.Builder(this)
+                .title(getString(R.string.please_wait))
+                .content(getString(R.string.search_for_rasbot_network))
+                .progress(true, 0)
+                .build();
 
 
         startService();
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        BusProvider.getInstance().register(this);
+    }
+
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-        stopService(new Intent(this, ConnectionService.class));
+        if (connectionServiceBound) {
+            unbindService(serviceConnection);
+            connectionServiceBound = false;
+        }
+
+        compositeSubscription.clear();
     }
 
-    /* Handler handler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            int status = msg.what;
-
-            switch (status){
-                case ACTION_RASBOT_DISCOVERED:
-                    setDialogContent(R.string.rasbot_network_has_been_found);
-                    break;
-                case ACTION_NETWORK_CONNECTED:
-
-                    setDialogContent(R.string.connect_with_rasbot_network);
-
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                connectionService.connect();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-
-                        }
-                    }, 1000);
-
-                    break;
-
-                case ACTION_APPLICATION_CONNECTED:
-                    setDialogContent(R.string.connect_with_rasbot_application);
-                    mSterringButton.setEnabled(true);
-                    progressBarCircularIndeterminate.setVisibility(View.GONE);
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
+    @Subscribe
+    public void connectionStatus(ConnectionStatusEvent event) {
+        switch (event.getStatus()) {
+            case ConnectionStatusEvent.START_CONNECTING:
+                setDialogContent(R.string.connecting);
+                dialog.show();
+                break;
+            case ConnectionStatusEvent.CONNECTION_ESTABLISHED:
+                compositeSubscription.add(Observable.timer(2, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(i -> {
                             dialog.dismiss();
-                        }
-                    }, 3000);
-
-                    isRasbotAppConnection = true;
-                    mSterringButton.setEnabled(true);
-                    break;
-                case ACTION_NETWORK_DISCONNECTED:
-                    mConnectionStatus.setText("Szukanie sieci...");
-                    isRasbotAppConnection = false;
-                    mSterringButton.setEnabled(false);
-                    progressBarCircularIndeterminate.setVisibility(View.VISIBLE);
-                    break;
-
-            }
-        }
-    };*/
-
-    private void setDialogContent(int content){
-        if (dialog instanceof MaterialDialog){
-            ((MaterialDialog) dialog).setContent(content);
-        }else{
-            ((WaitDialog) dialog).setContent(content);
+                            mSterringButton.setEnabled(true);
+                        }));
+                break;
+            case ConnectionStatusEvent.CONNECTION_TIMEOUT:
+                Snackbar.make(containerRelativeLayout, R.string.connection_timeout, 1000).show();
+                break;
+            case ConnectionStatusEvent.CONNECTION_INTERRUPTED:
+                snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_interrupted, Snackbar.LENGTH_LONG);
+                snackbar.show();
+                break;
+            case ConnectionStatusEvent.CONNECTION_ERROR:
+                compositeSubscription.add(Observable.timer(1, TimeUnit.SECONDS)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(i -> {
+                            dialog.dismiss();
+                            snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_error, Snackbar.LENGTH_LONG);
+                            snackbar.show();
+                        }));
+                break;
         }
     }
 
-    @Override
-    protected void onResume() {
-        /*if (!isRasbotAppConnection) {
-            rasbotWifiManager.onResume();
-            if (!rasbotWifiManager.isRasbotConnection()) {
-                rasbotWifiManager.searchForRasbotNetwork();
-            }
 
-
-            dialog.show();
-        }*/
-        super.onResume();
+    private void setDialogContent(int content) {
+        ((MaterialDialog) dialog).setContent(content);
     }
-
-    @Override
-    protected void onPause() {
-        /*if (rasbotWifiManager != null && !isRasbotAppConnection) {
-            rasbotWifiManager.onPause();
-            rasbotWifiManager.stopScanning();
-        }*/
-        super.onPause();
-    }
-
 
     @OnClick(R.id.bMainActivityConnectToServer)
-    public void connect(){
-
+    public void connect() {
         connectionService.connect();
-
-
-        /*if (!isRasbotAppConnection){
-            rasbotWifiManager.searchForRasbotNetwork();
-            dialog.show();
-        }else{
-            Toast.makeText(this, R.string.application_is_already_connectes, Toast.LENGTH_LONG).show();
-        }*/
     }
-
 
 
     @OnClick(R.id.bMianActivitySterring)
-    public void sterring(){
+    public void sterring() {
         startActivity(new Intent(this, SterringActivity.class));
     }
 
     @OnClick(R.id.bMainActivityAbout)
-    public void about(){
+    public void about() {
         new MaterialDialog.Builder(this)
                 .title(R.string.about_title)
                 .customView(R.layout.about_dialog, true)
@@ -233,18 +171,15 @@ public class MainActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
 
-        if (connectionServiceBound){
-            unbindService(serviceConnection);
-            connectionServiceBound = false;
-        }
+        BusProvider.getInstance().unregister(this);
     }
 
-    public void startService(){
+    public void startService() {
         Intent connectionIntent = new Intent(this, ConnectionService.class);
         bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
         startService(connectionIntent);
 
-    };
+    }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override

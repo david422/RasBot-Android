@@ -12,8 +12,10 @@ import pl.dp.rasbot.connection.ConnectionManager;
 import pl.dp.rasbot.connection.MessageCallback;
 import pl.dp.rasbot.connection.PingCallback;
 import pl.dp.rasbot.connection.PingManager;
+import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.event.MessageEvent;
 import pl.dp.rasbot.utils.BusProvider;
+import pl.dp.rasbot.utils.RasbotWifiManager;
 import timber.log.Timber;
 
 /**
@@ -27,11 +29,11 @@ public class ConnectionService extends Service implements PingCallback, MessageC
     private final IBinder mbinder = new LocalBinder();
 
     private ConnectionManager connectionManager;
+    private PingManager pingManager;
 
-    private static final String host = "192.168.2.1";
+    private static final String host = "10.10.32.92";
     private static final int PING_PORT = 4334;
     private static final int MESSAGE_PORT = 4333;
-    private PingManager pingManager;
 
     @Nullable
     @Override
@@ -53,12 +55,20 @@ public class ConnectionService extends Service implements PingCallback, MessageC
         connectionManager = new ConnectionManager(host, MESSAGE_PORT);
         connectionManager.setMessageCallback(this);
         connectionManager.connect();
+
+        BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_ESTABLISHED));
     }
 
     @Override
     public void connectionInterrupted() {
         Timber.d("connectionInterrupted: ");
         connectionManager.release();
+        BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_INTERRUPTED));
+    }
+
+    @Override
+    public void connectionError() {
+        BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_ERROR));
     }
 
     @Override
@@ -87,6 +97,7 @@ public class ConnectionService extends Service implements PingCallback, MessageC
 
     public void connect() {
         if (!pingManager.isConnected()){
+            BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.START_CONNECTING));
             pingManager.init();
         }
     }

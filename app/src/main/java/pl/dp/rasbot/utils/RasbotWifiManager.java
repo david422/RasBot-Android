@@ -97,8 +97,8 @@ public class RasbotWifiManager{
     public boolean isRasbotConnection() {
         String ssid = wifiManager.getConnectionInfo().getSSID().replace("\"","");
         if(ssid.equals(RASBOT_NETWORK_NAME)){
-            BusProvider.getInstance().post(MainActivity.ACTION_NETWORK_CONNECTED);
-            handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_CONNECTED);
+//            BusProvider.getInstance().post(MainActivity.ACTION_NETWORK_CONNECTED);
+//            handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_CONNECTED);
             return true;
         }else{
             return false;
@@ -128,8 +128,8 @@ public class RasbotWifiManager{
             for (ScanResult scanResult: wifiList){
                 if (scanResult.SSID.equals(RASBOT_NETWORK_NAME)){
 
-                    BusProvider.getInstance().post(MainActivity.ACTION_RASBOT_DISCOVERED);
-                    handler.sendEmptyMessage(MainActivity.ACTION_RASBOT_DISCOVERED);
+//                    BusProvider.getInstance().post(MainActivity.ACTION_RASBOT_DISCOVERED);
+//                    handler.sendEmptyMessage(MainActivity.ACTION_RASBOT_DISCOVERED);
                     WifiConfiguration rasbotNetworkConfiguration = new WifiConfiguration();
 
 
@@ -200,8 +200,8 @@ public class RasbotWifiManager{
             if (netInfo != null && netInfo.getType() == ConnectivityManager.TYPE_WIFI) {
                 Log.d(TAG, "Have Wifi Connection");
                 if (isRasbotConnection()) {
-                    BusProvider.getInstance().post(MainActivity.ACTION_NETWORK_CONNECTED);
-                    handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_CONNECTED);
+//                    BusProvider.getInstance().post(MainActivity.ACTION_NETWORK_CONNECTED);
+//                    handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_CONNECTED);
                     isScanning = false;
                 } else {
                     searchForRasbotNetwork();
@@ -210,7 +210,7 @@ public class RasbotWifiManager{
             }else{
                     Log.d(TAG, "Don't have Wifi Connection");
                 isScanning = false;
-                    handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_DISCONNECTED);
+//                    handler.sendEmptyMessage(MainActivity.ACTION_NETWORK_DISCONNECTED);
                 }
         }
     }

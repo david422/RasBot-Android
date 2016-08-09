@@ -11,8 +11,8 @@ buildscript {
 apply plugin: 'com.android.application'
 
 apply plugin: 'io.fabric'
-
-
+apply plugin: 'android-apt'
+apply plugin: 'me.tatarka.retrolambda'
 
 ext{
     def localProperties = new Properties()
@@ -28,14 +28,10 @@ android {
 
     defaultConfig {
         applicationId "pl.dp.rasbot"
-        minSdkVersion 21
-        targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
-
-        jackOptions {
-            enabled true
-        }
+        minSdkVersion 18
+        targetSdkVersion 19
+        versionCode 2
+        versionName "1.1"
     }
 
     sourceSets.main {
@@ -93,19 +89,24 @@ android {
     }
 }
 
+retrolambda {
+    jdk "/usr/lib/jvm/java-8-oracle"
+    oldJdk "/usr/lib/jvm/java-7-oracle"
+    javaVersion JavaVersion.VERSION_1_7
+    defaultMethods false
+    incremental true
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.jakewharton:butterknife:6.1.0'
-    compile 'com.squareup:otto:1.3.6'
+    compile 'com.android.support:appcompat-v7:24.1.1'
+    compile 'com.android.support:design:24.1.1'
 
-    compile 'com.github.navasmdc:MaterialDesign:1.5@aar'
+    compile 'com.jakewharton:butterknife:8.1.0'
+    apt 'com.jakewharton:butterknife-compiler:8.1.0'
+    compile 'com.squareup:otto:1.3.8'
 
-
-    compile 'com.afollestad:material-dialogs:0.7.8.1'
-
-
-    compile 'com.googlecode.gstreamer-java:gstreamer-java:1.5'
+    compile 'com.afollestad.material-dialogs:core:0.9.0.0'
 
     compile 'io.reactivex:rxandroid:1.2.1'
     compile 'io.reactivex:rxjava:1.1.6'
