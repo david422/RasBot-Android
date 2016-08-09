@@ -96,6 +96,15 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         ButterKnife.inject(this);
 
 
+        mLeftSlider = (Slider) findViewById(R.id.sSterringActivityLeftSlider);
+        mRightSlider = (Slider) findViewById(R.id.sSterringActivityRightSlider);
+        mLeftValueTextView = (TextView) findViewById(R.id.tvSterringActivityLeftValue);
+        mRightValueTextView = (TextView) findViewById(R.id.tvSterringActivityRightValue);
+
+        findViewById(R.id.bSterringActivityPlay).setOnClickListener(v -> onPlaylick((Button) v));
+
+        mSurfaceView = (SurfaceView) findViewById(R.id.surfView);
+
         mLeftSlider.setOnSliderValueChanged(onLeftSliderChanged);
         mRightSlider.setOnSliderValueChanged(onRightSliderChanged);
 
