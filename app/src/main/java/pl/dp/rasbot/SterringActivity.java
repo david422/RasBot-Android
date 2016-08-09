@@ -1,5 +1,6 @@
 package pl.dp.rasbot;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -7,15 +8,17 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import java.util.HashMap;
-import java.util.Map;
 
 import butterknife.ButterKnife;
 import butterknife.BindView;
@@ -24,6 +27,7 @@ import pl.dp.rasbot.customview.Slider;
 import pl.dp.rasbot.message.LeftControl;
 import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
+import pl.dp.rasbot.utils.AnimatorHelper;
 
 /**
  * Created by Project4You S.C. on 02.05.15.
@@ -31,7 +35,7 @@ import pl.dp.rasbot.streaming.StreamingManager;
  * Email: dawidpod1@gmail.com
  * All rights reserved!
  */
-public class SterringActivity extends Activity implements SurfaceHolder.Callback{
+public class SterringActivity extends FragmentActivity implements SurfaceHolder.Callback{
 
     @BindView(R.id.sSterringActivityLeftSlider)
     Slider mLeftSlider;
@@ -45,11 +49,16 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
     @BindView(R.id.surfView)
     SurfaceView mSurfaceView;
 
+    @BindView(R.id.rlSteeringActivityCameraView)
+    RelativeLayout cameraViewRelativeLayout;
+
     private StreamingManager streamingManager;
 
     private ConnectionService connectionService;
     private boolean connectionServiceBound = false;
 
+    private boolean settingEnabled;
+    private SettingsFragment settingsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +138,58 @@ public class SterringActivity extends Activity implements SurfaceHolder.Callback
         }
     }
 
+    @OnClick(R.id.bSterringActivitySettings)
+    public void settings(){
+
+        int sliderXOffset;
+        int cameraViewOffset;
+
+
+        if (settingEnabled){
+            sliderXOffset = 0;
+            cameraViewOffset = 0;
+            settingEnabled = false;
+        }else{
+            sliderXOffset = mLeftSlider.getWidth();
+            cameraViewOffset = -sliderXOffset;
+            settingEnabled = true;
+        }
+
+        if (settingEnabled) {
+            mLeftSlider.animate().translationX(-sliderXOffset).start();
+            mRightSlider.animate().translationX(sliderXOffset).setListener(new AnimatorHelper() {
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    cameraViewRelativeLayout.animate().translationX(cameraViewOffset).start();
+                    mRightSlider.animate().setListener(null);
+                    enterFragment();
+                }
+            }).start();
+        }else{
+            cameraViewRelativeLayout.animate().translationX(cameraViewOffset).setListener(new AnimatorHelper(){
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    mLeftSlider.animate().translationX(-sliderXOffset).start();
+                    mRightSlider.animate().translationX(sliderXOffset).start();
+                    cameraViewRelativeLayout.animate().setListener(null);
+
+                    getSupportFragmentManager().beginTransaction().remove(settingsFragment);
+                }
+            }).start();
+        }
+    }
+
+    public void enterFragment(){
+        FragmentTransaction fragmentManager =  getSupportFragmentManager().beginTransaction();
+
+        fragmentManager.setCustomAnimations(R.anim.fragment_enter, R.anim.fragment_exit);
+        if (settingsFragment == null) {
+            settingsFragment = new SettingsFragment();
+        }
+
+        fragmentManager.add(R.id.fragmentTest, settingsFragment, "fragmentTag");
+        fragmentManager.commit();
+    }
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {

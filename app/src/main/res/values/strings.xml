@@ -24,4 +24,5 @@
     <string name="connection_timeout">Timeout</string>
     <string name="connection_error">Błąd połączenia</string>
     <string name="connecting">Łączenie</string>
+    <string name="camera_settings">Ustawienia</string>
 </resources>
