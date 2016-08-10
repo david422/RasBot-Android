@@ -1,8 +1,8 @@
 package pl.dp.rasbot;
 
+import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 /**
  * Created by dpodolak on 09.08.16.
  */
-public class SettingsFragment extends Fragment{
+public class SettingsFragment extends Fragment {
 
     @Nullable
     @Override

@@ -3,6 +3,7 @@ package pl.dp.rasbot.streaming;
 import android.content.Context;
 import android.util.Log;
 import android.view.Surface;
+import android.view.SurfaceView;
 
 import com.gstreamer.GStreamer;
 
@@ -61,9 +62,22 @@ public class StreamingManager {
         }
     }
 
+    Surface surface;
+
     public void setSurfaceView(Surface surface){
+        this.surface = surface;
         nativeSurfaceInit(surface);
     }
+
+    public void refresh(){
+        nativePause();
+        nativeFinalize();
+        nativeSurfaceFinalize();
+        nativeInit();
+        nativeSurfaceInit(surface);
+        nativePlay();
+    }
+
 
     public void release(){
         nativeFinalize();

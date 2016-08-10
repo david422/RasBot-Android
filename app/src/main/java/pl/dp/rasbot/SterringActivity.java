@@ -1,7 +1,10 @@
 package pl.dp.rasbot;
 
 import android.animation.Animator;
-import android.app.Activity;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -9,13 +12,18 @@ import android.os.Bundle;
 import android.os.IBinder;
 
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.ScaleAnimation;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -27,7 +35,9 @@ import pl.dp.rasbot.customview.Slider;
 import pl.dp.rasbot.message.LeftControl;
 import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
+import pl.dp.rasbot.utils.AnimationHelper;
 import pl.dp.rasbot.utils.AnimatorHelper;
+import timber.log.Timber;
 
 /**
  * Created by Project4You S.C. on 02.05.15.
@@ -46,11 +56,21 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
     @BindView(R.id.tvSterringActivityRightValue)
     TextView mRightValueTextView;
 
+    @BindView(R.id.bSterringActivityPlay)
+    Button runCameraButton;
+
+    @BindView(R.id.bSterringActivitySettings)
+    Button settingsButton;
+
+
     @BindView(R.id.surfView)
     SurfaceView mSurfaceView;
 
     @BindView(R.id.rlSteeringActivityCameraView)
     RelativeLayout cameraViewRelativeLayout;
+
+    @BindView(R.id.fragmentTest)
+    FrameLayout settingsFrameLayout;
 
     private StreamingManager streamingManager;
 
@@ -59,6 +79,10 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
     private boolean settingEnabled;
     private SettingsFragment settingsFragment;
+
+    private int sHeight;
+    private int sWidth;
+    private RelativeLayout.LayoutParams originaParams;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,10 +97,12 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ButterKnife.bind(this);
 
+
         streamingManager = new StreamingManager(this);
 
         mLeftSlider.setOnSliderValueChanged(onLeftSliderChanged);
         mRightSlider.setOnSliderValueChanged(onRightSliderChanged);
+
 
         SurfaceHolder sh = mSurfaceView.getHolder();
         sh.addCallback(this);
@@ -143,56 +169,141 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
         int sliderXOffset;
         int cameraViewOffset;
-
+        float scale;
+        int settingTranslation;
 
         if (settingEnabled){
             sliderXOffset = 0;
             cameraViewOffset = 0;
+            scale = 1;
             settingEnabled = false;
+            settingTranslation = settingsFrameLayout.getWidth();
         }else{
             sliderXOffset = mLeftSlider.getWidth();
-            cameraViewOffset = -sliderXOffset;
+            scale = 0.7f;
+            cameraViewOffset = (int) (-sliderXOffset - ((1-scale)/2 * cameraViewRelativeLayout.getWidth()));
             settingEnabled = true;
+            settingTranslation = 0;
+            settingsFrameLayout.setTranslationX(settingsFrameLayout.getWidth());
         }
 
+        AnimatorSet sliderAnimatorSet = new AnimatorSet();
+        AnimatorSet camerViewAnimatorSet = new AnimatorSet();
+        AnimatorSet mainAnimatorSet = new AnimatorSet();
+
+
+        ObjectAnimator leftSliderObjectAnimator = ObjectAnimator.ofFloat(mLeftSlider, View.TRANSLATION_X, -sliderXOffset);
+        ObjectAnimator rightSliderObjectAnimator = ObjectAnimator.ofFloat(mRightSlider, View.TRANSLATION_X, sliderXOffset);
+        sliderAnimatorSet.playTogether(leftSliderObjectAnimator, rightSliderObjectAnimator);
+
+        runCameraButton.animate().setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                Timber.d("SterringActivity:onAnimationUpdate1: ");
+            }
+        });
+        cameraViewRelativeLayout.animate().setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                Timber.d("SterringActivity:onAnimationUpdate2: ");
+            }
+        });
+
+
+        ValueAnimator scaleCamerView = ObjectAnimator.ofFloat(cameraViewRelativeLayout, View.SCALE_X, scale);
+        ObjectAnimator scaleXSurfaceView = ObjectAnimator.ofFloat(mSurfaceView, View.SCALE_X, scale);
+        ObjectAnimator scaleYSurfaceView = ObjectAnimator.ofFloat(mSurfaceView, View.SCALE_Y, scale);
+        ObjectAnimator translaterCamerView = ObjectAnimator.ofFloat(cameraViewRelativeLayout, View.TRANSLATION_X, cameraViewOffset);
+        ObjectAnimator fragmentTranslation = ObjectAnimator.ofFloat(settingsFrameLayout, View.TRANSLATION_X, settingTranslation);
+        camerViewAnimatorSet.playTogether(scaleCamerView, translaterCamerView, fragmentTranslation);
+
+
+        scaleCamerView.addUpdateListener(valueAnimator -> {
+            float buttonScale = 1/cameraViewRelativeLayout.getScaleX();
+            runCameraButton.setTextScaleX(buttonScale);
+            settingsButton.setTextScaleX(buttonScale);
+        });
+
         if (settingEnabled) {
-            mLeftSlider.animate().translationX(-sliderXOffset).start();
-            mRightSlider.animate().translationX(sliderXOffset).setListener(new AnimatorHelper() {
+
+
+            camerViewAnimatorSet.addListener(new AnimatorHelper(){
                 @Override
-                public void onAnimationEnd(Animator animator) {
-                    cameraViewRelativeLayout.animate().translationX(cameraViewOffset).start();
-                    mRightSlider.animate().setListener(null);
+                public void onAnimationStart(Animator animator) {
                     enterFragment();
                 }
-            }).start();
-        }else{
-            cameraViewRelativeLayout.animate().translationX(cameraViewOffset).setListener(new AnimatorHelper(){
+
                 @Override
                 public void onAnimationEnd(Animator animator) {
-                    mLeftSlider.animate().translationX(-sliderXOffset).start();
-                    mRightSlider.animate().translationX(sliderXOffset).start();
-                    cameraViewRelativeLayout.animate().setListener(null);
 
-                    getSupportFragmentManager().beginTransaction().remove(settingsFragment);
+
+//                    /*mSurfaceView.setScaleX(1);
+//                    mSurfaceView.setScaleY(1);
+//*/
+//
+//                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(originaParams);
+//                    params.height = (int) (sHeight*0.7f);
+//                    params.width = (int) (sWidth*0.8f);
+//                    int marginH = (sHeight - params.height)/2;
+//                    int marginW = (sWidth - params.width)/2;
+//                    params.setMargins(0, 0, 0, marginH);
+//                    mSurfaceView.setLayoutParams(params);                    /*mSurfaceView.setScaleX(1);
+//                    mSurfaceView.setScaleY(1);
+//*/
+//
+//                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(originaParams);
+//                    params.height = (int) (sHeight*0.7f);
+//                    params.width = (int) (sWidth*0.8f);
+//                    int marginH = (sHeight - params.height)/2;
+//                    int marginW = (sWidth - params.width)/2;
+//                    params.setMargins(0, 0, 0, marginH);
+//                    mSurfaceView.setLayoutParams(params);
+
+
+                    streamingManager.refresh();
                 }
-            }).start();
+            });
+
+            mainAnimatorSet.playSequentially(sliderAnimatorSet, camerViewAnimatorSet);
+            mainAnimatorSet.start();
+        }else{
+
+            mSurfaceView.setLayoutParams(originaParams);
+
+            camerViewAnimatorSet.addListener(new AnimatorHelper(){
+                @Override
+                public void onAnimationEnd(Animator animator) {
+
+
+                    FragmentTransaction ft = getFragmentManager().beginTransaction();
+                    ft.remove(settingsFragment).commit();
+                }
+            });
+
+
+            mainAnimatorSet.playSequentially(camerViewAnimatorSet, sliderAnimatorSet);
+            mainAnimatorSet.start();
         }
     }
 
     public void enterFragment(){
-        FragmentTransaction fragmentManager =  getSupportFragmentManager().beginTransaction();
+        FragmentTransaction fragmentTransaction =  getFragmentManager().beginTransaction();
 
-        fragmentManager.setCustomAnimations(R.anim.fragment_enter, R.anim.fragment_exit);
         if (settingsFragment == null) {
             settingsFragment = new SettingsFragment();
         }
 
-        fragmentManager.add(R.id.fragmentTest, settingsFragment, "fragmentTag");
-        fragmentManager.commit();
+        fragmentTransaction.add(R.id.fragmentTest, settingsFragment, "fragmentTag");
+        fragmentTransaction.commit();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+
+        sHeight = mSurfaceView.getHeight();
+        sWidth = mSurfaceView.getWidth();
+
+        originaParams = (RelativeLayout.LayoutParams) mSurfaceView.getLayoutParams();
         streamingManager.init();
         streamingManager.setSurfaceView(surfaceHolder.getSurface());
     }
