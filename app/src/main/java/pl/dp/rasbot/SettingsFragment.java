@@ -19,6 +19,12 @@ import timber.log.Timber;
  */
 public class SettingsFragment extends PreferenceFragment {
 
+    public static final String PREF_KEY_CAMERA_FPS = "pref_key_camera_fps";
+    public static final String PREF_KEY_CAMERA_RESOLUTION = "pref_key_camera_resolution";
+    public static final String PREF_KEY_CAMERA_BRIGHTNESS = "pref_key_camera_brightness";
+    public static final String PREF_KEY_CAMERA_FLIP_VERTICAL = "pref_key_camera_flip_vertical";
+    public static final String PREF_KEY_CAMERA_FLIP_HORIZONTAL = "pref_key_camera_flip_horizontal";
+
     private ConnectionService connectionService;
     private StreamingManager streamingManager;
 
@@ -45,11 +51,11 @@ public class SettingsFragment extends PreferenceFragment {
 
         addPreferencesFromResource(R.xml.preferences);
 
-        resolutionPreference = findPreference("pref_key_camera_resolution");
-        fpsPreference = (PreferencePicker) findPreference("pref_key_camera_fps");
-        brighnessPreference = (PreferencePicker) findPreference("pref_key_camera_brightness");
-        flipVertPreference = findPreference("pref_key_camera_flip_vertical");
-        flipHorizontalPreference = findPreference("pref_key_camera_flip_horizontal");
+        resolutionPreference = findPreference(PREF_KEY_CAMERA_RESOLUTION);
+        fpsPreference = (PreferencePicker) findPreference(PREF_KEY_CAMERA_FPS);
+        brighnessPreference = (PreferencePicker) findPreference(PREF_KEY_CAMERA_BRIGHTNESS);
+        flipVertPreference = findPreference(PREF_KEY_CAMERA_FLIP_VERTICAL);
+        flipHorizontalPreference = findPreference(PREF_KEY_CAMERA_FLIP_HORIZONTAL);
         preferenceButton = findPreference("pref_key_save_button");
 
         resolutionPreference.setOnPreferenceChangeListener(this::resolutionPreferenceChanged);
@@ -111,7 +117,7 @@ public class SettingsFragment extends PreferenceFragment {
 
     private boolean horizontalVerticalPreferenceChanged(Preference preference, Object newValue) {
         Timber.d("horizontalVerticalPreferenceChanged: ");
-        camera1Message.setHorizontalVertical((Boolean) newValue);
+        camera1Message.setFlipHorizontal((Boolean) newValue);
         return true;
     }
 

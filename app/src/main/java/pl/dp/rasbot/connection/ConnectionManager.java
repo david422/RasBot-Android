@@ -61,6 +61,17 @@ public class ConnectionManager {
                 commThread.setMessageCallback(messageCallback);
                 communicationThread = new Thread(commThread);
                 communicationThread.start();
+                sendMessage(new Message("") {
+                    @Override
+                    public String getCommand() {
+                        return "";
+                    }
+
+                    @Override
+                    public String getType() {
+                        return "settings";
+                    }
+                });
             } catch (UnknownHostException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -84,7 +95,7 @@ public class ConnectionManager {
         if (dataPrintWriter!= null) {
             Log.d(TAG, "send data:" + data.getJsonString()
                     + ", time:" + (System.currentTimeMillis() / 1000));
-            dataPrintWriter.println(data.getJsonString());
+            dataPrintWriter.print(data.getJsonString() + "\n\r");
             dataPrintWriter.flush();
         }
     }

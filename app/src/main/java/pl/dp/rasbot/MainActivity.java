@@ -4,8 +4,10 @@ import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Window;
@@ -16,6 +18,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
 import java.util.concurrent.TimeUnit;
@@ -24,6 +27,8 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
+import pl.dp.rasbot.event.MessageEvent;
+import pl.dp.rasbot.message.camera.Camera1Message;
 import pl.dp.rasbot.utils.BusProvider;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
@@ -65,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
      * Show progress of searching network
      */
     private Dialog dialog;
+
+
 
 
     @Override
@@ -141,6 +148,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Subscribe
+    public void onReceiveMessage(MessageEvent messageEvent){
+        Camera1Message c1m = new Gson().fromJson((String) messageEvent.getMessage().getObject(), Camera1Message.class);
+        SharedPreferences.Editor pref = PreferenceManager.getDefaultSharedPreferences(this).edit();
+
+        pref.putString(SettingsFragment.PREF_KEY_CAMERA_RESOLUTION, c1m.getResolution());
+        pref.putInt(SettingsFragment.PREF_KEY_CAMERA_FPS, c1m.getFps());
+        pref.putBoolean(SettingsFragment.PREF_KEY_CAMERA_FLIP_VERTICAL, c1m.isFlipVertical());
+        pref.putBoolean(SettingsFragment.PREF_KEY_CAMERA_FLIP_HORIZONTAL, c1m.isFlipHorizontal());
+        pref.putInt(SettingsFragment.PREF_KEY_CAMERA_BRIGHTNESS, c1m.getBrightness());
+
+        pref.apply();
+
+    }
 
     private void setDialogContent(int content) {
         ((MaterialDialog) dialog).setContent(content);

@@ -23,7 +23,7 @@ public class Camera1Message extends Message {
     private boolean flipVertical = true;
 
     @SerializedName("fh")
-    private boolean horizontalVertical = true;
+    private boolean flipHorizontal = true;
 
     public Camera1Message() {
         super(null);
@@ -61,7 +61,33 @@ public class Camera1Message extends Message {
         this.flipVertical = flipVertical;
     }
 
-    public void setHorizontalVertical(boolean horizontalVertical) {
-        this.horizontalVertical = horizontalVertical;
+    public void setFlipHorizontal(boolean flipHorizontal) {
+        this.flipHorizontal = flipHorizontal;
+    }
+
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public int getFps() {
+        return fps;
+    }
+
+    public int getBrightness() {
+        return brightness;
+    }
+
+    public boolean isFlipVertical() {
+        return flipVertical;
+    }
+
+    public boolean isFlipHorizontal() {
+        return flipHorizontal;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("res: %s, fps: %d, brightness: %d, flipVert: %b, flipHor: %b", resolution, fps, brightness, flipVertical, flipHorizontal );
     }
 }
