@@ -59,7 +59,7 @@
                 android:id="@+id/bSterringActivitySettings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/camera_settings"
+                android:text="@string/settings"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="0.65"/>
         </LinearLayout>

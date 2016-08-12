@@ -79,6 +79,7 @@ public class StreamingManager {
     }
 
 
+
     public void release(){
         nativeFinalize();
         nativeSurfaceFinalize();

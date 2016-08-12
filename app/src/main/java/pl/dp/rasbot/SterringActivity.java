@@ -15,13 +15,8 @@ import android.support.v4.app.FragmentActivity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.ScaleAnimation;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
@@ -35,7 +30,6 @@ import pl.dp.rasbot.customview.Slider;
 import pl.dp.rasbot.message.LeftControl;
 import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
-import pl.dp.rasbot.utils.AnimationHelper;
 import pl.dp.rasbot.utils.AnimatorHelper;
 import timber.log.Timber;
 
@@ -180,7 +174,7 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
             settingTranslation = settingsFrameLayout.getWidth();
         }else{
             sliderXOffset = mLeftSlider.getWidth();
-            scale = 0.7f;
+            scale = getScale();
             cameraViewOffset = (int) (-sliderXOffset - ((1-scale)/2 * cameraViewRelativeLayout.getWidth()));
             settingEnabled = true;
             settingTranslation = 0;
@@ -291,10 +285,29 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
         if (settingsFragment == null) {
             settingsFragment = new SettingsFragment();
+            settingsFragment.setConnectionService(connectionService);
+            settingsFragment.setStreamingManager(streamingManager);
         }
 
         fragmentTransaction.add(R.id.fragmentTest, settingsFragment, "fragmentTag");
         fragmentTransaction.commit();
+    }
+
+    private float getScale(){
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int cameraViewWidth = cameraViewRelativeLayout.getWidth();
+        int settingsViewWidth = settingsFrameLayout.getWidth();
+
+        int displayDiff = cameraViewWidth + settingsViewWidth - screenWidth;
+
+        if (displayDiff <= 0){
+            return 0f;
+        }
+
+        float scale = (float)(cameraViewWidth - displayDiff)/cameraViewWidth;
+        Timber.d("getScale: scale %f", scale);
+        return scale;
+
     }
 
     @Override

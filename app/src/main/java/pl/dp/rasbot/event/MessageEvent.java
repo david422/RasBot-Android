@@ -1,13 +1,15 @@
 package pl.dp.rasbot.event;
 
-public class MessageEvent {
-    private String message;
+import pl.dp.rasbot.message.ReceivedMessage;
 
-    public MessageEvent(String message) {
+public class MessageEvent {
+    private ReceivedMessage message;
+
+    public MessageEvent(ReceivedMessage message) {
         this.message = message;
     }
 
-    public String getMessage() {
+    public ReceivedMessage getMessage() {
         return message;
     }
 }

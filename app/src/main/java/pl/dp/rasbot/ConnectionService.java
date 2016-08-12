@@ -13,6 +13,7 @@ import pl.dp.rasbot.connection.PingManager;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.event.MessageEvent;
 import pl.dp.rasbot.message.Message;
+import pl.dp.rasbot.message.ReceivedMessage;
 import pl.dp.rasbot.utils.BusProvider;
 import timber.log.Timber;
 
@@ -29,7 +30,8 @@ public class ConnectionService extends Service implements PingCallback, MessageC
     private ConnectionManager connectionManager;
     private PingManager pingManager;
 
-    private static final String host = "10.10.32.92";
+//    private static final String host = "10.10.32.92";
+    private static final String host = "192.168.2.1";
     private static final int PING_PORT = 4334;
     private static final int MESSAGE_PORT = 4333;
 
@@ -75,7 +77,8 @@ public class ConnectionService extends Service implements PingCallback, MessageC
     }
 
     @Override
-    public void onMessageReceived(String message) {
+    public void onMessageReceived(ReceivedMessage message) {
+        Timber.d("onMessageReceived: message" + message);
         BusProvider.getInstance().post(new MessageEvent(message));
     }
 

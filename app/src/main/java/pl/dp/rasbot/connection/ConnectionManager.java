@@ -2,6 +2,8 @@ package pl.dp.rasbot.connection;
 
 import android.util.Log;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import pl.dp.rasbot.message.Message;
+import pl.dp.rasbot.message.ReceivedMessage;
+import timber.log.Timber;
 
 
 /**
@@ -120,9 +124,13 @@ public class ConnectionManager {
                 try {
                     String line;
 
+                    Gson gson = new Gson();
                     while ((line = input.readLine()) != null) {
+
+                        Timber.d("run: line: " + line);
+                        ReceivedMessage rm = gson.fromJson(line, ReceivedMessage.class);
                         if (messageCallback != null) {
-                            messageCallback.onMessageReceived(line);
+                            messageCallback.onMessageReceived(rm);
                         }
                     }
 

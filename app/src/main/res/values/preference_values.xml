@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="camera_resulution_entries">
+        <item>640x360</item>
+        <item>800x480</item>
+        <item>1280x720</item>
+    </string-array>
+
+    <string-array name="camera_resolution_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+</resources>

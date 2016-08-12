@@ -169,12 +169,7 @@ public class PingManager implements PingCommandCallback {
                         String sentTime = readCommand.split(" ")[2];
                         long messageSent = Long.parseLong(sentTime);
                         long diff = System.currentTimeMillis() - messageSent;
-                        Timber.d(readCommand + ", diff " + diff);
-//                    if (readCommand.equals(PING_COMMAND)){
-//                        Timber.d("run: pint received");
 
-//                    }else{
-//                        throw new IllegalArgumentException("Incorrect command!");
                     }
 
                     if (callback != null) {

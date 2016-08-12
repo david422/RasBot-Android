@@ -24,5 +24,15 @@
     <string name="connection_timeout">Timeout</string>
     <string name="connection_error">Błąd połączenia</string>
     <string name="connecting">Łączenie</string>
-    <string name="camera_settings">Ustawienia</string>
+
+    <string name="settings">Ustawienia</string>
+    <string name="camera_settings_title">USTAWIENIA KAMERY</string>
+    <string name="camera_resolution_title">Rozdzielczość kamery</string>
+    <string name="camera_resolution_summary">Wybierz rozdzielczość z jaką powinien być strumieniowany obraz</string>
+    <string name="camera_dialog_resolution_title">Wybierz rozdzielczość</string>
+    <string name="choose_fps">FPS</string>
+    <string name="choose_brightness">Jasność</string>
+    <string name="flip_vertical">Odwróc pionowo</string>
+    <string name="flip_horizontal">Odwróc poziomo</string>
+
 </resources>
