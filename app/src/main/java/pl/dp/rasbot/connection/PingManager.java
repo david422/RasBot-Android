@@ -59,7 +59,7 @@ public class PingManager implements PingCommandCallback {
         this.pingCallback = pingCallback;
     }
 
-    public void connectToPingServer() throws IOException {
+    private void connectToPingServer() throws IOException {
         pingSocket = new Socket(host, port);
 
         while (!pingSocket.isConnected());

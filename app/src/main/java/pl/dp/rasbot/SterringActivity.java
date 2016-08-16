@@ -74,8 +74,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
     private boolean settingEnabled;
     private SettingsFragment settingsFragment;
 
-    private int sHeight;
-    private int sWidth;
     private RelativeLayout.LayoutParams originaParams;
 
     @Override
@@ -190,23 +188,8 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
         ObjectAnimator rightSliderObjectAnimator = ObjectAnimator.ofFloat(mRightSlider, View.TRANSLATION_X, sliderXOffset);
         sliderAnimatorSet.playTogether(leftSliderObjectAnimator, rightSliderObjectAnimator);
 
-        runCameraButton.animate().setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                Timber.d("SterringActivity:onAnimationUpdate1: ");
-            }
-        });
-        cameraViewRelativeLayout.animate().setUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                Timber.d("SterringActivity:onAnimationUpdate2: ");
-            }
-        });
-
 
         ValueAnimator scaleCamerView = ObjectAnimator.ofFloat(cameraViewRelativeLayout, View.SCALE_X, scale);
-        ObjectAnimator scaleXSurfaceView = ObjectAnimator.ofFloat(mSurfaceView, View.SCALE_X, scale);
-        ObjectAnimator scaleYSurfaceView = ObjectAnimator.ofFloat(mSurfaceView, View.SCALE_Y, scale);
         ObjectAnimator translaterCamerView = ObjectAnimator.ofFloat(cameraViewRelativeLayout, View.TRANSLATION_X, cameraViewOffset);
         ObjectAnimator fragmentTranslation = ObjectAnimator.ofFloat(settingsFrameLayout, View.TRANSLATION_X, settingTranslation);
         camerViewAnimatorSet.playTogether(scaleCamerView, translaterCamerView, fragmentTranslation);
@@ -229,31 +212,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
                 @Override
                 public void onAnimationEnd(Animator animator) {
-
-
-//                    /*mSurfaceView.setScaleX(1);
-//                    mSurfaceView.setScaleY(1);
-//*/
-//
-//                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(originaParams);
-//                    params.height = (int) (sHeight*0.7f);
-//                    params.width = (int) (sWidth*0.8f);
-//                    int marginH = (sHeight - params.height)/2;
-//                    int marginW = (sWidth - params.width)/2;
-//                    params.setMargins(0, 0, 0, marginH);
-//                    mSurfaceView.setLayoutParams(params);                    /*mSurfaceView.setScaleX(1);
-//                    mSurfaceView.setScaleY(1);
-//*/
-//
-//                    RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(originaParams);
-//                    params.height = (int) (sHeight*0.7f);
-//                    params.width = (int) (sWidth*0.8f);
-//                    int marginH = (sHeight - params.height)/2;
-//                    int marginW = (sWidth - params.width)/2;
-//                    params.setMargins(0, 0, 0, marginH);
-//                    mSurfaceView.setLayoutParams(params);
-
-
                     streamingManager.refresh();
                 }
             });
@@ -312,9 +270,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
-        sHeight = mSurfaceView.getHeight();
-        sWidth = mSurfaceView.getWidth();
 
         originaParams = (RelativeLayout.LayoutParams) mSurfaceView.getLayoutParams();
         streamingManager.init();

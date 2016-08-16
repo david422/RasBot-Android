@@ -34,5 +34,10 @@
     <string name="choose_brightness">Jasność</string>
     <string name="flip_vertical">Odwróc pionowo</string>
     <string name="flip_horizontal">Odwróc poziomo</string>
+    <string name="wifi_searching">Szukanie sieci wifi</string>
+    <string name="wifi_found">Znaleziono sieć</string>
+    <string name="wifi_not_found">Nie znaleziono sieci</string>
+    <string name="wifi_connected">Połączono z siecią</string>
+    <string name="wifi_disconnected">Rozłączono z siecią</string>
 
 </resources>

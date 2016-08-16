@@ -117,6 +117,24 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe
     public void connectionStatus(ConnectionStatusEvent event) {
         switch (event.getStatus()) {
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_SEARCHING:
+                setDialogContent(R.string.wifi_searching);
+                dialog.show();
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_FOUND:
+                setDialogContent(R.string.wifi_found);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
+                dialog.dismiss();
+                Snackbar.make(containerRelativeLayout, R.string.wifi_not_found, Snackbar.LENGTH_LONG);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED:
+                setDialogContent(R.string.wifi_connected);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED:
+                dialog.dismiss();
+                Snackbar.make(containerRelativeLayout, R.string.wifi_disconnected, Snackbar.LENGTH_LONG);
+                break;
             case ConnectionStatusEvent.START_CONNECTING:
                 setDialogContent(R.string.connecting);
                 dialog.show();

@@ -24,9 +24,9 @@ import timber.log.Timber;
  * Email: dawidpod1@gmail.com
  * All rights reserved!
  */
-public class ConnectionManager {
+public class MessageManager {
 
-    public static final String TAG = "ConnectionManager";
+    public static final String TAG = "MessageManager";
 
     private Socket messageSocket;
     private PrintWriter dataPrintWriter;
@@ -38,13 +38,9 @@ public class ConnectionManager {
 
     private Thread communicationThread;
 
-    public ConnectionManager(String host, int port) {
+    public MessageManager(String host, int port) {
         this.port = port;
         this.host = host;
-    }
-
-    public void setMessageCallback(MessageCallback messageCallback) {
-        this.messageCallback = messageCallback;
     }
 
     public void connect() {
