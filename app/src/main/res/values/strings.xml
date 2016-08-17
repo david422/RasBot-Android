@@ -40,4 +40,11 @@
     <string name="wifi_connected">Połączono z siecią</string>
     <string name="wifi_disconnected">Rozłączono z siecią</string>
 
+    <string name="status_wifi_connection" formatted="false"><![CDATA[<b>Połączenie WiFi: </b><font color="%1$s">%2$s</font>]]></string>
+    <string name="status_robot_connection" formatted="false"><![CDATA[<b>Połączenie RasBot: </b><font color="%1$s">%2$s</font>]]></string>
+    <string name="searching">Szukanie...</string>
+    <string name="found">Znaleziono</string>
+    <string name="not_connected">Nie połączono</string>
+    <string name="connected">Połączono</string>
+
 </resources>

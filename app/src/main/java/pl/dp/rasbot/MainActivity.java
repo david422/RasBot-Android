@@ -5,11 +5,13 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -40,6 +42,10 @@ public class MainActivity extends AppCompatActivity {
 
     @BindView(R.id.rlMainActivityContainer)
     RelativeLayout containerRelativeLayout;
+    @BindView(R.id.tvMainActivityWifiStatus)
+    TextView wifiStatusTextView;
+    @BindView(R.id.tvMainActivityRobotStatus)
+    TextView robotStatusTextView;
     private CompositeSubscription compositeSubscription = new CompositeSubscription();
 
     @BindView(R.id.tvMainActivityStatus)
@@ -72,8 +78,6 @@ public class MainActivity extends AppCompatActivity {
     private Dialog dialog;
 
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -90,10 +94,33 @@ public class MainActivity extends AppCompatActivity {
                 .title(getString(R.string.please_wait))
                 .content(getString(R.string.search_for_rasbot_network))
                 .progress(true, 0)
+                .cancelable(false)
                 .build();
 
-
+        setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
+        setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
         startService();
+    }
+
+    private void setRobotStatusTextView(String text, int color){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            robotStatusTextView.setText(Html.fromHtml(getString(R.string.status_robot_connection, color, text), Html.FROM_HTML_MODE_LEGACY));
+        }else{
+            robotStatusTextView.setText(Html.fromHtml(getString(R.string.status_robot_connection, color, text)));
+
+        }
+    }
+
+    private void setWifiStatusTextView(String text, int color){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            wifiStatusTextView.setText(Html.fromHtml(getString(R.string.status_wifi_connection, color, text), Html.FROM_HTML_MODE_LEGACY));
+        }else{
+            String textToDisplay = getString(R.string.status_wifi_connection, color, text);
+            Timber.d("MainActivity:setWifiStatusTextView: text: " +  textToDisplay);
+
+            wifiStatusTextView.setText(Html.fromHtml(textToDisplay));
+
+        }
     }
 
     @Override
@@ -119,27 +146,37 @@ public class MainActivity extends AppCompatActivity {
         switch (event.getStatus()) {
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_SEARCHING:
                 setDialogContent(R.string.wifi_searching);
+                setWifiStatusTextView(getString(R.string.searching), Color.RED);
                 dialog.show();
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_FOUND:
                 setDialogContent(R.string.wifi_found);
+                setWifiStatusTextView(getString(R.string.found), Color.GREEN);
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
                 dialog.dismiss();
+                setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
                 Snackbar.make(containerRelativeLayout, R.string.wifi_not_found, Snackbar.LENGTH_LONG);
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED:
                 setDialogContent(R.string.wifi_connected);
+                setWifiStatusTextView(getString(R.string.connected), Color.GREEN);
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED:
                 dialog.dismiss();
+                setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
                 Snackbar.make(containerRelativeLayout, R.string.wifi_disconnected, Snackbar.LENGTH_LONG);
                 break;
             case ConnectionStatusEvent.START_CONNECTING:
                 setDialogContent(R.string.connecting);
-                dialog.show();
+                if (!dialog.isShowing()){
+                    dialog.show();
+                }
+                setRobotStatusTextView(getString(R.string.connecting), Color.RED);
                 break;
             case ConnectionStatusEvent.CONNECTION_ESTABLISHED:
+                Snackbar.make(containerRelativeLayout, R.string.connected, Snackbar.LENGTH_LONG).show();
+                setRobotStatusTextView(getString(R.string.connected), Color.GREEN);
                 compositeSubscription.add(Observable.timer(2, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(i -> {
@@ -148,14 +185,17 @@ public class MainActivity extends AppCompatActivity {
                         }));
                 break;
             case ConnectionStatusEvent.CONNECTION_TIMEOUT:
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
                 Snackbar.make(containerRelativeLayout, R.string.connection_timeout, 1000).show();
                 break;
             case ConnectionStatusEvent.CONNECTION_INTERRUPTED:
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
                 snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_interrupted, Snackbar.LENGTH_LONG);
                 snackbar.show();
                 break;
             case ConnectionStatusEvent.CONNECTION_ERROR:
-                compositeSubscription.add(Observable.timer(1, TimeUnit.SECONDS)
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
+                compositeSubscription.add(Observable.timer(500, TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(i -> {
                             dialog.dismiss();
@@ -167,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Subscribe
-    public void onReceiveMessage(MessageEvent messageEvent){
+    public void onReceiveMessage(MessageEvent messageEvent) {
         Camera1Message c1m = new Gson().fromJson((String) messageEvent.getMessage().getObject(), Camera1Message.class);
         SharedPreferences.Editor pref = PreferenceManager.getDefaultSharedPreferences(this).edit();
 

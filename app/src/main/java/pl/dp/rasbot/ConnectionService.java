@@ -36,9 +36,10 @@ public class ConnectionService extends Service implements MessageCallback {
     private RasbotWifiManager wifiManager;
 
     private static final String host = "10.10.32.92";
-//    private static final String host = "192.168.2.1";
+    //    private static final String host = "192.168.2.1";
     private static final int PING_PORT = 4334;
     private static final int MESSAGE_PORT = 4333;
+    private WifiHandler wifiHandler;
 
     @Nullable
     @Override
@@ -60,7 +61,7 @@ public class ConnectionService extends Service implements MessageCallback {
     }
 
     public class LocalBinder extends Binder {
-        public ConnectionService getService(){
+        public ConnectionService getService() {
             return ConnectionService.this;
         }
     }
@@ -83,7 +84,7 @@ public class ConnectionService extends Service implements MessageCallback {
 
 
         Timber.d("ConnectionService:onCreate: init service");
-        WifiHandler wifiHandler = new WifiHandler(this, pingManager);
+        wifiHandler = new WifiHandler(this, pingManager);
         wifiManager = new RasbotWifiManager(this, wifiHandler);
     }
 
@@ -96,18 +97,15 @@ public class ConnectionService extends Service implements MessageCallback {
 
     public void connect() {
 
-        if (!wifiManager.isRasbotConnection()){
+        if (!wifiManager.isRasbotConnection()) {
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.RASBOT_WIFI_NETWORK_SEARCHING));
             wifiManager.searchForRasbotNetwork();
-        }else if (!pingManager.isConnected()){
-            BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.START_CONNECTING));
-            pingManager.init();
-        }else if (pingManager.isConnected()){
-            BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_ESTABLISHED));
+        } else if (wifiManager.isRasbotConnection()) {
+            wifiHandler.connected();
         }
     }
 
-    private static class WifiHandler implements WifiConnectionListener{
+    private static class WifiHandler implements WifiConnectionListener {
 
         private ConnectionService connectionService;
         private PingManager pingManager;
@@ -120,8 +118,14 @@ public class ConnectionService extends Service implements MessageCallback {
         @Override
         public void connected() {
             Timber.d("WifiHandler:connected: ");
-            new Handler().postDelayed(() -> pingManager.init(), 1500);
+
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED));
+            if (!pingManager.isConnected()) {
+                new Handler().postDelayed(() -> pingManager.init(), 1500);
+                BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.START_CONNECTING));
+            } else if (pingManager.isConnected()) {
+                BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_ESTABLISHED));
+            }
         }
 
         @Override
@@ -145,7 +149,7 @@ public class ConnectionService extends Service implements MessageCallback {
         }
     }
 
-    private static class PingHandler implements PingCallback{
+    private static class PingHandler implements PingCallback {
 
         private MessageManager connectionManager;
         private ConnectionService connectionService;

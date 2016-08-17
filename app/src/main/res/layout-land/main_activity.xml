@@ -38,6 +38,26 @@
             />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvMainActivityWifiStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="@string/status_wifi_connection"/>
+
+        <TextView
+            android:id="@+id/tvMainActivityRobotStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:text="@string/status_robot_connection"/>
+    </LinearLayout>
+
 
     <TextView
         android:id="@+id/tvMainActivityStatus"
