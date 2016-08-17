@@ -76,6 +76,8 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
     private RelativeLayout.LayoutParams originaParams;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

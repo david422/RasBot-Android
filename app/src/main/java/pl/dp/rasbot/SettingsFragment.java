@@ -1,10 +1,12 @@
 package pl.dp.rasbot;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.squareup.otto.Subscribe;
 
 import pl.dp.rasbot.event.MessageEvent;
@@ -36,6 +38,8 @@ public class SettingsFragment extends PreferenceFragment {
 
     private Preference preferenceButton;
     private Camera1Message camera1Message;
+
+    private Dialog waitDialog;
 
     public void setConnectionService(ConnectionService connectionService) {
         this.connectionService = connectionService;
@@ -69,7 +73,15 @@ public class SettingsFragment extends PreferenceFragment {
         BusProvider.getInstance().register(this);
         camera1Message = new Camera1Message();
 
+        waitDialog = new MaterialDialog.Builder(getActivity())
+                .title(getString(R.string.please_wait))
+                .progress(true, 0)
+                .cancelable(false)
+                .build();
+
     }
+
+
 
     @Override
     public void onDestroy() {
@@ -81,12 +93,16 @@ public class SettingsFragment extends PreferenceFragment {
     public void onMessageReceived(MessageEvent event) {
         Timber.d("onMessageReceived: %s", event.getMessage());
 
-        new Handler().postDelayed(() -> streamingManager.refresh(), 2000);
+        new Handler().postDelayed(() -> {
+            streamingManager.refresh();
+            waitDialog.dismiss();
+        }, 2000);
     }
 
     public boolean onPreferenceButton(Preference preference) {
         if (connectionService != null && streamingManager != null){
             connectionService.sendMessage(camera1Message);
+            waitDialog.show();
         }
         return true;
     }

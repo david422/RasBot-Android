@@ -95,9 +95,8 @@ public class PingManager implements PingCommandCallback {
                         release();
                         pingCallback.connectionInterrupted();
                     }
-                    Timber.d("PingManager:connectToPingServer: piniging");
 
-                    pingQueue.add("pm");
+                    pingQueue.add(PING_COMMAND);
                 }, Throwable::printStackTrace, () -> Timber.d("PingManager:connectToPingServer: onComplete"));
 
         pingPrintWriter.println(PING_COMMAND);
@@ -112,6 +111,8 @@ public class PingManager implements PingCommandCallback {
         if (pingSubscription.isUnsubscribed()){
             pingSubscription.unsubscribe();
         }
+
+
 
         try {
             pingSocket.close();
@@ -176,6 +177,11 @@ public class PingManager implements PingCommandCallback {
         }
 
         public void stopReceive(){
+            try {
+                pingReader.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             isRun = false;
         }
 
