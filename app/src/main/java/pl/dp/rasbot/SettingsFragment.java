@@ -49,6 +49,8 @@ public class SettingsFragment extends PreferenceFragment {
         this.streamingManager = streamingManager;
     }
 
+    private boolean settingsChanged;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,11 +64,11 @@ public class SettingsFragment extends PreferenceFragment {
         flipHorizontalPreference = findPreference(PREF_KEY_CAMERA_FLIP_HORIZONTAL);
         preferenceButton = findPreference("pref_key_save_button");
 
-        resolutionPreference.setOnPreferenceChangeListener(this::resolutionPreferenceChanged);
-        fpsPreference.setOnPreferenceChangeListener(this::fpsPreferenceChanged);
-        brighnessPreference.setOnPreferenceChangeListener(this::brightnessPreferenceChanged);
-        flipVertPreference.setOnPreferenceChangeListener(this::flipVerticalPreferenceChanged);
-        flipHorizontalPreference.setOnPreferenceChangeListener(this::horizontalVerticalPreferenceChanged);
+        resolutionPreference.setOnPreferenceChangeListener(this::settingsPreferenceChanged);
+        fpsPreference.setOnPreferenceChangeListener(this::settingsPreferenceChanged);
+        brighnessPreference.setOnPreferenceChangeListener(this::settingsPreferenceChanged);
+        flipVertPreference.setOnPreferenceChangeListener(this::settingsPreferenceChanged);
+        flipHorizontalPreference.setOnPreferenceChangeListener(this::settingsPreferenceChanged);
 
         preferenceButton.setOnPreferenceClickListener(this::onPreferenceButton);
 
@@ -96,6 +98,7 @@ public class SettingsFragment extends PreferenceFragment {
         new Handler().postDelayed(() -> {
             streamingManager.refresh();
             waitDialog.dismiss();
+            settingsChanged = false;
         }, 2000);
     }
 
@@ -107,35 +110,39 @@ public class SettingsFragment extends PreferenceFragment {
         return true;
     }
 
-    private boolean resolutionPreferenceChanged(Preference pref, Object newValue) {
+    public boolean isSettingsChanged() {
+        return settingsChanged;
+    }
 
-        camera1Message.setResolution((String) newValue);
-        Timber.d("resolutionPreferenceChanged: ");
+    private boolean settingsPreferenceChanged(Preference preference, Object newValue){
+
+        settingsChanged = true;
+        switch (preference.getKey()){
+            case PREF_KEY_CAMERA_RESOLUTION:
+                camera1Message.setResolution((String) newValue);
+                break;
+            case PREF_KEY_CAMERA_FPS:
+                camera1Message.setFps((Integer) newValue);
+                break;
+            case PREF_KEY_CAMERA_BRIGHTNESS:
+                camera1Message.setBrightness((Integer) newValue);
+                break;
+            case PREF_KEY_CAMERA_FLIP_HORIZONTAL:
+                camera1Message.setFlipHorizontal((Boolean) newValue);
+                break;
+            case PREF_KEY_CAMERA_FLIP_VERTICAL:
+                camera1Message.setFlipVertical((Boolean) newValue);
+                break;
+        }
+
         return true;
     }
 
-    private boolean fpsPreferenceChanged(Preference preference, Object newValue) {
-        camera1Message.setFps((Integer) newValue);
-        return true;
+    public void saveSettings() {
+
     }
 
-    private boolean brightnessPreferenceChanged(Preference preference, Object newValue) {
-        Timber.d("brightnessPreferenceChanged: ");
-        camera1Message.setBrightness((Integer) newValue);
-        return true;
+    public void resetSettings() {
+        settingsChanged = false;
     }
-
-    private boolean flipVerticalPreferenceChanged(Preference preference, Object newValue) {
-        Timber.d("flipVerticalPreferenceChanged: ");
-        camera1Message.setFlipVertical((Boolean) newValue);
-        return true;
-    }
-
-    private boolean horizontalVerticalPreferenceChanged(Preference preference, Object newValue) {
-        Timber.d("horizontalVerticalPreferenceChanged: ");
-        camera1Message.setFlipHorizontal((Boolean) newValue);
-        return true;
-    }
-
-
 }

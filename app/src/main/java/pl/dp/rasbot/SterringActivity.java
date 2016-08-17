@@ -4,8 +4,11 @@ import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -167,6 +170,23 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
         int settingTranslation;
 
         if (settingEnabled){
+
+            if (settingsFragment.isSettingsChanged()){
+                Dialog askDialog = new AlertDialog.Builder(this)
+                        .setTitle("Ustawienia nie zostały zapisane")
+                        .setMessage("Czy chcesz zapisać ustawienia?")
+                        .setPositiveButton("Tak", (dialogInterface, i) -> {
+                            settingsFragment.saveSettings();
+                            dialogInterface.dismiss();
+                        })
+                        .setNegativeButton("Nie", (dialogInterface, i) -> {
+                            settingsFragment.resetSettings();
+                            settings();
+                            dialogInterface.dismiss();
+                        }).show();
+                return;
+            }
+
             sliderXOffset = 0;
             cameraViewOffset = 0;
             scale = 1;
