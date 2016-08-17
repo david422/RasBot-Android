@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscription;
+import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
 /**
@@ -37,6 +38,9 @@ public class PingManager implements PingCommandCallback {
 
     private PingCallback pingCallback;
 
+    private PublishSubject<Long> stopSubject = PublishSubject.create();
+    private PingReceiver pingReceiver;
+
     public PingManager(String host, int port) {
         this.port = port;
         this.host = host;
@@ -59,6 +63,9 @@ public class PingManager implements PingCommandCallback {
         this.pingCallback = pingCallback;
     }
 
+
+
+
     private void connectToPingServer() throws IOException {
         pingSocket = new Socket(host, port);
 
@@ -72,25 +79,26 @@ public class PingManager implements PingCommandCallback {
                 new OutputStreamWriter(pingSocket.getOutputStream())),
                 false);
 
-        PingReceiver pingReceiver = new PingReceiver(pingSocket);
+        pingReceiver = new PingReceiver(pingSocket);
         pingReceiver.setCallback(this);
         pingReceiver.start();
 
 
         pingSubscription = Observable.interval(0, PING_INTERVAL, TimeUnit.MILLISECONDS)
+                .takeUntil(stopSubject)
                 .map(i -> PING_COMMAND)
                 .filter(i -> pingQueue.size() <= 2)
                 .subscribe(command -> {
 
                     if (pingQueue.size() > 1){
                         Timber.d("connectToPingServer: pingQueue size: %d", pingQueue.size());
-
-
+                        release();
                         pingCallback.connectionInterrupted();
                     }
+                    Timber.d("PingManager:connectToPingServer: piniging");
 
                     pingQueue.add("pm");
-                }, Throwable::printStackTrace);
+                }, Throwable::printStackTrace, () -> Timber.d("PingManager:connectToPingServer: onComplete"));
 
         pingPrintWriter.println(PING_COMMAND);
         pingPrintWriter.flush();
@@ -100,6 +108,7 @@ public class PingManager implements PingCommandCallback {
 
     public void release(){
 
+        stopSubject.onNext(null);
         if (pingSubscription.isUnsubscribed()){
             pingSubscription.unsubscribe();
         }
@@ -109,6 +118,11 @@ public class PingManager implements PingCommandCallback {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        if (pingReceiver != null) {
+            pingReceiver.stopReceive();
+        }
+
     }
 
     public void sendPing(){
@@ -142,13 +156,11 @@ public class PingManager implements PingCommandCallback {
 
         private PingCommandCallback callback;
 
-        private Socket pingSocket;
+        private boolean isRun;
 
         private BufferedReader pingReader;
 
         public PingReceiver(Socket pingSocket) throws IOException {
-
-            this.pingSocket = pingSocket;
 
             pingReader = new BufferedReader(new InputStreamReader(pingSocket.getInputStream()));
         }
@@ -157,13 +169,22 @@ public class PingManager implements PingCommandCallback {
             this.callback = callback;
         }
 
+        @Override
+        public synchronized void start() {
+            isRun = true;
+            super.start();
+        }
+
+        public void stopReceive(){
+            isRun = false;
+        }
 
         @Override
         public void run() {
             String readCommand;
 
             try {
-                while ((readCommand = pingReader.readLine()) != null){
+                while ((readCommand = pingReader.readLine()) != null && isRun){
 
                     if (!readCommand.equals(PING_COMMAND)){
                         String sentTime = readCommand.split(" ")[2];
@@ -177,6 +198,8 @@ public class PingManager implements PingCommandCallback {
                     }
 
                 }
+
+                Timber.d("PingReceiver:run: stop pinging");
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -37,10 +37,15 @@ public class MessageManager {
     private MessageCallback messageCallback;
 
     private Thread communicationThread;
+    private CommunicationThread commThread;
 
     public MessageManager(String host, int port) {
         this.port = port;
         this.host = host;
+    }
+
+    public void setMessageCallback(MessageCallback messageCallback) {
+        this.messageCallback = messageCallback;
     }
 
     public void connect() {
@@ -53,7 +58,7 @@ public class MessageManager {
                         new OutputStreamWriter(messageSocket.getOutputStream())),
                         false);
 
-                CommunicationThread commThread = new CommunicationThread(messageSocket);
+                commThread = new CommunicationThread(messageSocket);
                 commThread.setMessageCallback(messageCallback);
                 communicationThread = new Thread(commThread);
                 communicationThread.start();
@@ -98,11 +103,21 @@ public class MessageManager {
 
 
     public void release() {
-        dataPrintWriter.close();
-        try {
-            messageSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (dataPrintWriter != null) {
+            dataPrintWriter.close();
+        }
+
+        if (messageSocket != null) {
+
+            try {
+                messageSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (commThread != null) {
+            commThread.stop();
         }
     }
 
@@ -113,6 +128,8 @@ public class MessageManager {
 
         private BufferedReader input;
         private MessageCallback messageCallback;
+
+        private boolean isRun;
 
         public CommunicationThread(Socket clientSocket) {
 
@@ -131,8 +148,10 @@ public class MessageManager {
                 try {
                     String line;
 
+                    isRun = true;
                     Gson gson = new Gson();
-                    while ((line = input.readLine()) != null) {
+                    Timber.d("CommunicationThread:run: start run");
+                    while ((line = input.readLine()) != null && isRun) {
 
                         Timber.d("run: line: " + line);
                         ReceivedMessage rm = gson.fromJson(line, ReceivedMessage.class);
@@ -140,11 +159,16 @@ public class MessageManager {
                             messageCallback.onMessageReceived(rm);
                         }
                     }
+                    Timber.d("CommunicationThread:run: stop run");
 
 
                 } catch (IOException e) {
                    e.getMessage();
                 }
+        }
+
+        public void stop(){
+            isRun = false;
         }
 
         public void setMessageCallback(MessageCallback messageCallback) {

@@ -77,6 +77,7 @@ public class ConnectionService extends Service implements MessageCallback {
 
 
         messageManager = new MessageManager(host, MESSAGE_PORT);
+        messageManager.setMessageCallback(this);
 
         pingManager = new PingManager(host, PING_PORT);
         PingHandler pingHandler = new PingHandler(messageManager, this);
@@ -176,11 +177,14 @@ public class ConnectionService extends Service implements MessageCallback {
         @Override
         public void connectionError() {
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.CONNECTION_ERROR));
+            connectionManager.release();
             connectionService.stopSelf();
         }
 
         @Override
         public void connectionTimeout() {
+
+            connectionManager.release();
             connectionService.stopSelf();
         }
     }
