@@ -186,7 +186,7 @@ public class RasbotWifiManager {
                 Timber.d("WifiConnectionReceiver:onReceive: SSID: " + ssid);
                 if (networkInfo.isConnected() && ssid.equals(RASBOT_NETWORK_NAME)) {
                     for(WifiConnectionListener wcl: connectionListenerList){
-                        wcl.connected();
+                        wcl.wifiConnected();
                     }
                 }
             } else if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -195,7 +195,7 @@ public class RasbotWifiManager {
                 if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI &&
                         !networkInfo.isConnected()) {
                     for(WifiConnectionListener wcl: connectionListenerList){
-                        wcl.disconnected();
+                        wcl.wifiDisconnected();
                     }
 
                 }

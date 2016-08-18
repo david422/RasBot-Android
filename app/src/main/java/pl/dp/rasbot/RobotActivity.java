@@ -25,6 +25,9 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
     private boolean connectionServiceBound = false;
 
     private View parentLayout;
+
+    private boolean isConnected;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,16 +72,22 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
         }
     };
 
+    public boolean isConnected() {
+        return isConnected;
+    }
+
     @Override
     public void connectionEstablished() {
         Timber.d("RobotActivity:connectionEstablished: ");
         Snackbar.make(parentLayout, R.string.connected, Snackbar.LENGTH_LONG).show();
+        isConnected = true;
     }
 
     @Override
     public void connectionInterrupted() {
         Timber.d("RobotActivity:connectionInterrupted: ");
         Snackbar.make(parentLayout, R.string.connection_interrupted, Snackbar.LENGTH_LONG).show();
+        isConnected = false;
 
     }
 
@@ -86,17 +95,19 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
     public void connectionError() {
         Timber.d("RobotActivity:connectionError: ");
         Snackbar.make(parentLayout, R.string.connection_error, Snackbar.LENGTH_LONG).show();
+        isConnected = false;
     }
 
     @Override
     public void connectionTimeout() {
         Timber.d("RobotActivity:connectionTimeout: ");
         Snackbar.make(parentLayout, R.string.connection_timeout, 1000).show();
+        isConnected = false;
     }
 
     @Override
-    public void connected() {
-        Timber.d("RobotActivity:connected: ");
+    public void wifiConnected() {
+        Timber.d("RobotActivity:wifiConnected: ");
     }
 
     @Override
@@ -111,8 +122,8 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
     }
 
     @Override
-    public void disconnected() {
-        Timber.d("RobotActivity:disconnected: ");
+    public void wifiDisconnected() {
+        Timber.d("RobotActivity:wifiDisconnected: ");
         Snackbar.make(parentLayout, R.string.wifi_disconnected, Snackbar.LENGTH_LONG).show();
     }
 }

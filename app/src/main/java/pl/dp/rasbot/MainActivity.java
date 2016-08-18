@@ -204,7 +204,9 @@ public class MainActivity extends RobotActivity {
 
     @OnClick(R.id.bMianActivitySterring)
     public void sterring() {
-        startActivity(new Intent(this, SterringActivity.class));
+        if (isConnected()){
+            startActivity(new Intent(this, SterringActivity.class));
+        }
     }
 
     @OnClick(R.id.bMainActivityAbout)

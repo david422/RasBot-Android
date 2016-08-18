@@ -5,12 +5,12 @@ package pl.dp.rasbot.connection.wifi;
  */
 public interface WifiConnectionListener {
 
-    void connected();
+    void wifiConnected();
 
     void networkFound();
 
     void networkNotFound();
 
-    void disconnected();
+    void wifiDisconnected();
 
 }

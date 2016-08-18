@@ -119,7 +119,7 @@ public class ConnectionService extends Service implements MessageCallback {
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.RASBOT_WIFI_NETWORK_SEARCHING));
             wifiManager.searchForRasbotNetwork();
         } else if (wifiManager.isRasbotConnection()) {
-            wifiHandler.connected();
+            wifiHandler.wifiConnected();
         }
     }
 
@@ -134,8 +134,8 @@ public class ConnectionService extends Service implements MessageCallback {
         }
 
         @Override
-        public void connected() {
-            Timber.d("WifiHandler:connected: ");
+        public void wifiConnected() {
+            Timber.d("WifiHandler:wifiConnected: ");
 
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED));
             if (!pingManager.isConnected()) {
@@ -159,8 +159,8 @@ public class ConnectionService extends Service implements MessageCallback {
         }
 
         @Override
-        public void disconnected() {
-            Timber.d("WifiHandler:disconnected: ");
+        public void wifiDisconnected() {
+            Timber.d("WifiHandler:wifiDisconnected: ");
             pingManager.release();
             BusProvider.getInstance().post(new ConnectionStatusEvent(ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED));
             connectionService.stopSelf();

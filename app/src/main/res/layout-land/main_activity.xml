@@ -88,8 +88,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/bMainActivityConnectToServer"
         android:text="@string/go_to_sterring"
-        android:layout_marginBottom="20dp"
-        android:enabled="false"/>
+        android:layout_marginBottom="20dp"/>
 
     <Button
         android:id="@+id/bMainActivityAbout"
