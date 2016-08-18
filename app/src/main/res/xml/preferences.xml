@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:picker="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory
+        android:title="@string/camera_settings_title"
+        android:key="pref_key_camera_settings">
+
+        <ListPreference
+            android:title="@string/camera_resolution_title"
+            android:summary="@string/camera_resolution_summary"
+            android:key="pref_key_camera_resolution"
+            android:dialogTitle="@string/camera_dialog_resolution_title"
+            android:entries="@array/camera_resulution_entries"
+            android:entryValues="@array/camera_resulution_entries"
+        android:defaultValue="1"
+            />
+
+        <pl.dp.rasbot.preference.PreferencePicker
+            android:title="@string/choose_fps"
+            android:key="pref_key_camera_fps"
+            picker:preference_picker_max_value="60"
+            picker:preference_picker_min_value="1"/>
+
+        <pl.dp.rasbot.preference.PreferencePicker
+            android:title="@string/choose_brightness"
+            android:key="pref_key_camera_brightness"
+            picker:preference_picker_max_value="100"
+            picker:preference_picker_min_value="1"/>
+
+        <SwitchPreference
+            android:title="@string/flip_vertical"
+            android:key="pref_key_camera_flip_vertical"/>
+
+        <SwitchPreference
+            android:title="@string/flip_horizontal"
+            android:key="pref_key_camera_flip_horizontal"/>
+
+        <Preference
+            android:title="Zapisz"
+            android:key="pref_key_save_button"
+            />
+    </PreferenceCategory>
+</PreferenceScreen>

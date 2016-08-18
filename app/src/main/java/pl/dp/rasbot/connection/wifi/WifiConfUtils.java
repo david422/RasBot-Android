@@ -1,4 +1,4 @@
-package pl.dp.rasbot.wifi;
+package pl.dp.rasbot.connection.wifi;
 
 import android.net.wifi.WifiConfiguration;
 

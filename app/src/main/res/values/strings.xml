@@ -24,4 +24,35 @@
     <string name="connection_timeout">Timeout</string>
     <string name="connection_error">Błąd połączenia</string>
     <string name="connecting">Łączenie</string>
+
+    <string name="settings">Ustawienia</string>
+    <string name="camera_settings_title">USTAWIENIA KAMERY</string>
+    <string name="camera_resolution_title">Rozdzielczość kamery</string>
+    <string name="camera_resolution_summary">Wybierz rozdzielczość z jaką powinien być strumieniowany obraz</string>
+    <string name="camera_dialog_resolution_title">Wybierz rozdzielczość</string>
+    <string name="choose_fps">FPS</string>
+    <string name="choose_brightness">Jasność</string>
+    <string name="flip_vertical">Odwróc pionowo</string>
+    <string name="flip_horizontal">Odwróc poziomo</string>
+    <string name="wifi_searching">Szukanie sieci wifi</string>
+    <string name="wifi_found">Znaleziono sieć</string>
+    <string name="wifi_not_found">Nie znaleziono sieci</string>
+    <string name="wifi_connected">Połączono z siecią</string>
+    <string name="wifi_disconnected">Rozłączono z siecią</string>
+
+    <string name="status_wifi_connection" formatted="false"><![CDATA[<b>Połączenie WiFi: </b><font color="%1$s">%2$s</font>]]></string>
+    <string name="status_robot_connection" formatted="false"><![CDATA[<b>Połączenie RasBot: </b><font color="%1$s">%2$s</font>]]></string>
+    <string name="searching">Szukanie...</string>
+    <string name="found">Znaleziono</string>
+    <string name="not_connected">Nie połączono</string>
+    <string name="connected">Połączono</string>
+    <string name="settings_have_not_been_saved">Ustawienia nie zostały zapisane</string>
+    <string name="do_you_want_save_your_settings">Czy chcesz zapisać ustawienia?</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+    <string name="choose_action">Wybierz akcję</string>
+    <string name="connect_again">Połącz ponownie</string>
+    <string name="exit">Wyjdź</string>
+    <string name="connection_with_robot_has_been_interrupted">Połączenie z robotem zostało przerwane</string>
+
 </resources>

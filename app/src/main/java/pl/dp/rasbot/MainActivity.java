@@ -1,13 +1,12 @@
 package pl.dp.rasbot;
 
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
+import android.preference.PreferenceManager;
+import android.text.Html;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -16,6 +15,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.gson.Gson;
 import com.squareup.otto.Subscribe;
 
 import java.util.concurrent.TimeUnit;
@@ -24,17 +24,22 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
-import pl.dp.rasbot.utils.BusProvider;
+import pl.dp.rasbot.event.MessageEvent;
+import pl.dp.rasbot.message.camera.Camera1Message;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RobotActivity {
 
     @BindView(R.id.rlMainActivityContainer)
     RelativeLayout containerRelativeLayout;
+    @BindView(R.id.tvMainActivityWifiStatus)
+    TextView wifiStatusTextView;
+    @BindView(R.id.tvMainActivityRobotStatus)
+    TextView robotStatusTextView;
     private CompositeSubscription compositeSubscription = new CompositeSubscription();
 
     @BindView(R.id.tvMainActivityStatus)
@@ -55,11 +60,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.sConnectionProgressBar)
     ProgressBar progressBarCircularIndeterminate;
 
-    private Snackbar snackbar;
 
 
-    private ConnectionService connectionService;
-    private boolean connectionServiceBound = false;
 
     /**
      * Show progress of searching network
@@ -83,38 +85,74 @@ public class MainActivity extends AppCompatActivity {
                 .title(getString(R.string.please_wait))
                 .content(getString(R.string.search_for_rasbot_network))
                 .progress(true, 0)
+                .cancelable(false)
                 .build();
 
-
+        setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
+        setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
         startService();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        BusProvider.getInstance().register(this);
+    private void setRobotStatusTextView(String text, int color){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            robotStatusTextView.setText(Html.fromHtml(getString(R.string.status_robot_connection, color, text), Html.FROM_HTML_MODE_LEGACY));
+        }else{
+            robotStatusTextView.setText(Html.fromHtml(getString(R.string.status_robot_connection, color, text)));
+
+        }
     }
+
+    private void setWifiStatusTextView(String text, int color){
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            wifiStatusTextView.setText(Html.fromHtml(getString(R.string.status_wifi_connection, color, text), Html.FROM_HTML_MODE_LEGACY));
+        }else{
+            String textToDisplay = getString(R.string.status_wifi_connection, color, text);
+            Timber.d("MainActivity:setWifiStatusTextView: text: " +  textToDisplay);
+
+            wifiStatusTextView.setText(Html.fromHtml(textToDisplay));
+        }
+    }
+
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (connectionServiceBound) {
-            unbindService(serviceConnection);
-            connectionServiceBound = false;
-        }
-
         compositeSubscription.clear();
     }
 
     @Subscribe
     public void connectionStatus(ConnectionStatusEvent event) {
         switch (event.getStatus()) {
-            case ConnectionStatusEvent.START_CONNECTING:
-                setDialogContent(R.string.connecting);
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_SEARCHING:
+                setDialogContent(R.string.wifi_searching);
+                setWifiStatusTextView(getString(R.string.searching), Color.RED);
                 dialog.show();
                 break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_FOUND:
+                setDialogContent(R.string.wifi_found);
+                setWifiStatusTextView(getString(R.string.found), Color.GREEN);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
+                dialog.dismiss();
+                setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED:
+                setDialogContent(R.string.wifi_connected);
+                setWifiStatusTextView(getString(R.string.connected), Color.GREEN);
+                break;
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED:
+                dialog.dismiss();
+                break;
+            case ConnectionStatusEvent.START_CONNECTING:
+                setDialogContent(R.string.connecting);
+                if (!dialog.isShowing()){
+                    dialog.show();
+                }
+                setRobotStatusTextView(getString(R.string.connecting), Color.RED);
+                break;
             case ConnectionStatusEvent.CONNECTION_ESTABLISHED:
+                setRobotStatusTextView(getString(R.string.connected), Color.GREEN);
                 compositeSubscription.add(Observable.timer(2, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(i -> {
@@ -123,24 +161,36 @@ public class MainActivity extends AppCompatActivity {
                         }));
                 break;
             case ConnectionStatusEvent.CONNECTION_TIMEOUT:
-                Snackbar.make(containerRelativeLayout, R.string.connection_timeout, 1000).show();
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
                 break;
             case ConnectionStatusEvent.CONNECTION_INTERRUPTED:
-                snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_interrupted, Snackbar.LENGTH_LONG);
-                snackbar.show();
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
                 break;
             case ConnectionStatusEvent.CONNECTION_ERROR:
-                compositeSubscription.add(Observable.timer(1, TimeUnit.SECONDS)
+                setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
+                compositeSubscription.add(Observable.timer(500, TimeUnit.MILLISECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(i -> {
                             dialog.dismiss();
-                            snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_error, Snackbar.LENGTH_LONG);
-                            snackbar.show();
                         }));
                 break;
         }
     }
 
+    @Subscribe
+    public void onReceiveMessage(MessageEvent messageEvent) {
+        Camera1Message c1m = new Gson().fromJson((String) messageEvent.getMessage().getObject(), Camera1Message.class);
+        SharedPreferences.Editor pref = PreferenceManager.getDefaultSharedPreferences(this).edit();
+
+        pref.putString(SettingsFragment.PREF_KEY_CAMERA_RESOLUTION, c1m.getResolution());
+        pref.putInt(SettingsFragment.PREF_KEY_CAMERA_FPS, c1m.getFps());
+        pref.putBoolean(SettingsFragment.PREF_KEY_CAMERA_FLIP_VERTICAL, c1m.isFlipVertical());
+        pref.putBoolean(SettingsFragment.PREF_KEY_CAMERA_FLIP_HORIZONTAL, c1m.isFlipHorizontal());
+        pref.putInt(SettingsFragment.PREF_KEY_CAMERA_BRIGHTNESS, c1m.getBrightness());
+
+        pref.apply();
+
+    }
 
     private void setDialogContent(int content) {
         ((MaterialDialog) dialog).setContent(content);
@@ -154,7 +204,9 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick(R.id.bMianActivitySterring)
     public void sterring() {
-        startActivity(new Intent(this, SterringActivity.class));
+        if (isConnected()){
+            startActivity(new Intent(this, SterringActivity.class));
+        }
     }
 
     @OnClick(R.id.bMainActivityAbout)
@@ -167,30 +219,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
 
-        BusProvider.getInstance().unregister(this);
-    }
-
-    public void startService() {
-        Intent connectionIntent = new Intent(this, ConnectionService.class);
-        bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
-        startService(connectionIntent);
-
-    }
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
-            connectionServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            connectionServiceBound = false;
-        }
-    };
 }

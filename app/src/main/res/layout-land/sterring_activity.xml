@@ -15,11 +15,6 @@
         android:layout_alignParentRight="true"
         android:layout_height="match_parent" />
 
-
-
-
-
-
     <TextView
         android:id="@+id/tvSterringActivityLeftValue"
         android:layout_width="wrap_content"
@@ -38,25 +33,51 @@
         android:text="0 rpm"
         android:layout_toLeftOf="@+id/sSterringActivityRightSlider"/>
 
-    <Button
-        android:id="@+id/bSterringActivityPlay"
+    <RelativeLayout
+        android:id="@+id/rlSteeringActivityCameraView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/run_camera"
-        android:layout_alignParentBottom="true"
         android:layout_toRightOf="@id/sSterringActivityLeftSlider"
-        android:layout_toLeftOf="@id/sSterringActivityRightSlider"
-        />
+        android:layout_toLeftOf="@id/sSterringActivityRightSlider" >
 
-    <SurfaceView
-        android:id="@+id/surfView"
-        android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/llSteeringActivityCameraButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true">
+
+            <Button
+                android:id="@+id/bSterringActivityPlay"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/run_camera"
+
+                android:layout_weight="0.35"/>
+
+            <Button
+                android:id="@+id/bSterringActivitySettings"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/settings"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="0.65"/>
+        </LinearLayout>
+
+
+        <SurfaceView
+            android:id="@+id/surfView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_above="@id/llSteeringActivityCameraButtons"/>
+    </RelativeLayout>
+
+    <FrameLayout
+        android:id="@+id/fragmentTest"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
-        android:layout_margin="10dp"
-        android:layout_above="@id/bSterringActivityPlay"
-        android:layout_toRightOf="@id/sSterringActivityLeftSlider"
-        android:layout_toLeftOf="@id/sSterringActivityRightSlider" />
-
+        android:layout_alignParentRight="true"/>
 
 
 </RelativeLayout>

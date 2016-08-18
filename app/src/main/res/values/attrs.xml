@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PickerPreference">
+        <attr name="preference_picker_max_value" format="integer"/>
+        <attr name="preference_picker_min_value" format="integer"/>
+        <attr name="preference_picker_wrap_wheel" format="boolean"/>
+    </declare-styleable>
+
+</resources>

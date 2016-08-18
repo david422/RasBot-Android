@@ -3,7 +3,7 @@ package pl.dp.rasbot.message;
 /**
  * Created by dpodolak on 09.08.16.
  */
-public class RightControl extends Message{
+public class RightControl extends ControllMessage{
 
     public RightControl(Object parameter) {
         super(parameter);

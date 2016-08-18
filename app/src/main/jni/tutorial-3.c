@@ -158,8 +158,8 @@ static void *app_function (void *userdata) {
   /* Build pipeline */
   data->pipeline = gst_parse_launch("videotestsrc ! warptv ! ffmpegcolorspace ! autovideosink", &error);
 
-//  data->pipeline = gst_parse_launch("udpsrc port=8554 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, sprop-parameter-sets=\\\"J2QAFKwrQLj/LwDxImo\\\\=\\\\,KO4fLA\\\\=\\\\=\\\"\", payload=96\" ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
-//  data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink sync=false", &error);
+ //data->pipeline = gst_parse_launch("udpsrc port=8554 caps=\"application/x-rtp, media=video, clock-rate=90000, encoding-name=H264, sprop-parameter-sets=\\\"J2QAFKwrQLj/LwDxImo\\\\=\\\\,KO4fLA\\\\=\\\\=\\\"\", payload=96\" ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
+ //data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! avdec_h264 ! videoconvert ! autovideosink sync=false", &error);
   //data->pipeline = gst_parse_launch("tcpclientsrc host=192.168.2.1 port=8554 ! gdpdepay ! rtph264depay ! ffdec_h264 ! autovideosink sync=false", &error);
 
   if (error) {
