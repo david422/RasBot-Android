@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.text.Html;
 import android.view.Window;
 import android.view.WindowManager;
@@ -27,7 +26,6 @@ import butterknife.OnClick;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.event.MessageEvent;
 import pl.dp.rasbot.message.camera.Camera1Message;
-import pl.dp.rasbot.utils.BusProvider;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.subscriptions.CompositeSubscription;
@@ -62,7 +60,6 @@ public class MainActivity extends RobotActivity {
     @BindView(R.id.sConnectionProgressBar)
     ProgressBar progressBarCircularIndeterminate;
 
-    private Snackbar snackbar;
 
 
 
@@ -139,7 +136,6 @@ public class MainActivity extends RobotActivity {
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
                 dialog.dismiss();
                 setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
-                Snackbar.make(containerRelativeLayout, R.string.wifi_not_found, Snackbar.LENGTH_LONG);
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_CONNECTED:
                 setDialogContent(R.string.wifi_connected);
@@ -147,8 +143,6 @@ public class MainActivity extends RobotActivity {
                 break;
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED:
                 dialog.dismiss();
-                setWifiStatusTextView(getString(R.string.not_connected), Color.RED);
-                Snackbar.make(containerRelativeLayout, R.string.wifi_disconnected, Snackbar.LENGTH_LONG);
                 break;
             case ConnectionStatusEvent.START_CONNECTING:
                 setDialogContent(R.string.connecting);
@@ -158,7 +152,6 @@ public class MainActivity extends RobotActivity {
                 setRobotStatusTextView(getString(R.string.connecting), Color.RED);
                 break;
             case ConnectionStatusEvent.CONNECTION_ESTABLISHED:
-                Snackbar.make(containerRelativeLayout, R.string.connected, Snackbar.LENGTH_LONG).show();
                 setRobotStatusTextView(getString(R.string.connected), Color.GREEN);
                 compositeSubscription.add(Observable.timer(2, TimeUnit.SECONDS)
                         .observeOn(AndroidSchedulers.mainThread())
@@ -169,12 +162,9 @@ public class MainActivity extends RobotActivity {
                 break;
             case ConnectionStatusEvent.CONNECTION_TIMEOUT:
                 setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
-                Snackbar.make(containerRelativeLayout, R.string.connection_timeout, 1000).show();
                 break;
             case ConnectionStatusEvent.CONNECTION_INTERRUPTED:
                 setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
-                snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_interrupted, Snackbar.LENGTH_LONG);
-                snackbar.show();
                 break;
             case ConnectionStatusEvent.CONNECTION_ERROR:
                 setRobotStatusTextView(getString(R.string.not_connected), Color.RED);
@@ -182,8 +172,6 @@ public class MainActivity extends RobotActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(i -> {
                             dialog.dismiss();
-                            snackbar = Snackbar.make(containerRelativeLayout, R.string.connection_error, Snackbar.LENGTH_LONG);
-                            snackbar.show();
                         }));
                 break;
         }

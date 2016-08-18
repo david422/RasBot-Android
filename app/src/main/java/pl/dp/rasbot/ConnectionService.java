@@ -81,12 +81,13 @@ public class ConnectionService extends Service implements MessageCallback {
 
         pingManager = new PingManager(host, PING_PORT);
         PingHandler pingHandler = new PingHandler(messageManager, this);
-        pingManager.setPingCallback(pingHandler);
+        pingManager.addPingCallback(pingHandler);
 
 
         Timber.d("ConnectionService:onCreate: init service");
         wifiHandler = new WifiHandler(this, pingManager);
-        wifiManager = new RasbotWifiManager(this, wifiHandler);
+        wifiManager = new RasbotWifiManager(this);
+        wifiManager.addConectionListener(wifiHandler);
     }
 
     @Override
@@ -94,6 +95,22 @@ public class ConnectionService extends Service implements MessageCallback {
         super.onDestroy();
         wifiManager.release();
         Timber.d("ConnectionService:onDestroy: ");
+    }
+
+    public void addPingCallback(PingCallback pingCallback){
+        pingManager.addPingCallback(pingCallback);
+    }
+
+    public void removePingCallback(PingCallback pingCallback){
+        pingManager.removePingCallback(pingCallback);
+    }
+
+    public void addWifiConnectionListener(WifiConnectionListener connectionListener){
+        wifiManager.addConectionListener(connectionListener);
+    }
+
+    public void removeWifiConnectionListener(WifiConnectionListener connectionListener){
+        wifiManager.removeConectionListener(connectionListener);
     }
 
     public void connect() {

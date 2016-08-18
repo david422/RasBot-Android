@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,7 +38,7 @@ public class PingManager implements PingCommandCallback {
 
     private PrintWriter pingPrintWriter;
 
-    private PingCallback pingCallback;
+    private List<PingCallback> pingCallbackList = new ArrayList<>();
 
     private PublishSubject<Long> stopSubject = PublishSubject.create();
     private PingReceiver pingReceiver;
@@ -46,24 +48,27 @@ public class PingManager implements PingCommandCallback {
         this.host = host;
     }
 
+    public void addPingCallback(PingCallback callback){
+        pingCallbackList.add(callback);
+    }
+
+    public void removePingCallback(PingCallback callback){
+        pingCallbackList.remove(callback);
+    }
     public void init(){
 
         Thread pingThread = new Thread(() -> {
             try {
                 connectToPingServer();
             } catch (IOException e) {
-                pingCallback.connectionError();
+                for (PingCallback pc: pingCallbackList){
+                    pc.connectionError();
+                }
                 e.printStackTrace();
             }
         });
         pingThread.start();
     }
-
-    public void setPingCallback(PingCallback pingCallback) {
-        this.pingCallback = pingCallback;
-    }
-
-
 
 
     private void connectToPingServer() throws IOException {
@@ -71,8 +76,8 @@ public class PingManager implements PingCommandCallback {
 
         while (!pingSocket.isConnected());
 
-        if (pingCallback != null) {
-            pingCallback.connectionEstablished();
+        for (PingCallback pc: pingCallbackList){
+            pc.connectionEstablished();
         }
 
         pingPrintWriter = new PrintWriter(new BufferedWriter(
@@ -93,7 +98,9 @@ public class PingManager implements PingCommandCallback {
                     if (pingQueue.size() > 1){
                         Timber.d("connectToPingServer: pingQueue size: %d", pingQueue.size());
                         release();
-                        pingCallback.connectionInterrupted();
+                        for (PingCallback pc: pingCallbackList){
+                            pc.connectionInterrupted();
+                        }
                     }
 
                     pingQueue.add(PING_COMMAND);

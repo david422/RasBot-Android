@@ -13,6 +13,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,20 +47,26 @@ public class RasbotWifiManager {
     //                                                 PGS Software WiFi
     private static final String RASBOT_NETWORK_PASWORD = "qla3Iad9ousla";
 
-    private WifiConnectionListener connectionListener;
+    private List<WifiConnectionListener> connectionListenerList = new ArrayList<>();
 
-    public RasbotWifiManager(Context context, WifiConnectionListener connectionListener) {
+    public RasbotWifiManager(Context context) {
         this.context = context;
-        this.connectionListener = connectionListener;
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
 
-        wifiConnectionReceiver = new WifiConnectionReceiver(connectionListener, wifiManager);
+        wifiConnectionReceiver = new WifiConnectionReceiver(connectionListenerList, wifiManager);
 
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         context.registerReceiver(wifiConnectionReceiver, filter);
     }
 
+    public void addConectionListener(WifiConnectionListener connectionListener){
+        connectionListenerList.add(connectionListener);
+    }
+
+    public void removeConectionListener(WifiConnectionListener connectionListener){
+        connectionListenerList.remove(connectionListener);
+    }
 
     public void searchForRasbotNetwork() {
 
@@ -72,14 +79,16 @@ public class RasbotWifiManager {
                 .filter(result -> result.SSID.equals(RASBOT_NETWORK_NAME))
                 .toList()
                 .doOnNext(list -> {
-                    if (list.isEmpty() && connectionListener != null) {
-                        connectionListener.networkNotFound();
+                    if (list.isEmpty() && connectionListenerList != null) {
+                        for(WifiConnectionListener wcl: connectionListenerList){
+                            wcl.networkNotFound();
+                        }
                     }
                 })
                 .map(resultsList -> Collections.max(resultsList, (scanResult, t1) -> new Integer(scanResult.level).compareTo(t1.level)))
                 .subscribe(scanResult -> {
-                    if (connectionListener != null) {
-                        connectionListener.networkFound();
+                    for(WifiConnectionListener wcl: connectionListenerList){
+                        wcl.networkFound();
                     }
 
                     wifiManager.disconnect();
@@ -157,12 +166,12 @@ public class RasbotWifiManager {
 
     public static class WifiConnectionReceiver extends BroadcastReceiver {
 
-        private WifiConnectionListener connectionListener;
+        private List<WifiConnectionListener> connectionListenerList;
 
         private WifiManager wifiManager;
 
-        public WifiConnectionReceiver(WifiConnectionListener connectionListener, WifiManager wifiManager) {
-            this.connectionListener = connectionListener;
+        public WifiConnectionReceiver(List<WifiConnectionListener> connectionListener, WifiManager wifiManager) {
+            this.connectionListenerList = connectionListener;
             this.wifiManager = wifiManager;
         }
 
@@ -176,8 +185,8 @@ public class RasbotWifiManager {
                 String ssid = wifiManager.getConnectionInfo().getSSID().replace("\"", "");
                 Timber.d("WifiConnectionReceiver:onReceive: SSID: " + ssid);
                 if (networkInfo.isConnected() && ssid.equals(RASBOT_NETWORK_NAME)) {
-                    if (connectionListener != null) {
-                        connectionListener.connected();
+                    for(WifiConnectionListener wcl: connectionListenerList){
+                        wcl.connected();
                     }
                 }
             } else if (intent.getAction().equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
@@ -185,8 +194,8 @@ public class RasbotWifiManager {
                         intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
                 if (networkInfo.getType() == ConnectivityManager.TYPE_WIFI &&
                         !networkInfo.isConnected()) {
-                    if (connectionListener != null) {
-                        connectionListener.disconnected();
+                    for(WifiConnectionListener wcl: connectionListenerList){
+                        wcl.disconnected();
                     }
 
                 }

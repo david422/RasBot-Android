@@ -89,9 +89,9 @@ public class SterringActivity extends RobotActivity implements SurfaceHolder.Cal
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.sterring_activity);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
