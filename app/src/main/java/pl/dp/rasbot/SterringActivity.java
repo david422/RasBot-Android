@@ -49,7 +49,7 @@ import timber.log.Timber;
  * Email: dawidpod1@gmail.com
  * All rights reserved!
  */
-public class SterringActivity extends FragmentActivity implements SurfaceHolder.Callback{
+public class SterringActivity extends RobotActivity implements SurfaceHolder.Callback{
 
     @BindView(R.id.sSterringActivityLeftSlider)
     Slider mLeftSlider;
@@ -77,9 +77,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
     FrameLayout settingsFrameLayout;
 
     private StreamingManager streamingManager;
-
-    private ConnectionService connectionService;
-    private boolean connectionServiceBound = false;
 
     private boolean settingEnabled;
     private SettingsFragment settingsFragment;
@@ -110,10 +107,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
         SurfaceHolder sh = mSurfaceView.getHolder();
         sh.addCallback(this);
-
-        startService();
-
-        BusProvider.getInstance().register(this);
     }
 
     @Override
@@ -128,15 +121,6 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (connectionServiceBound){
-            unbindService(serviceConnection);
-            connectionServiceBound = false;
-        }
-        BusProvider.getInstance().unregister(this);
-    }
 
     @Subscribe
     public void connectionStatus(ConnectionStatusEvent event){
@@ -358,24 +342,5 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
         streamingManager.release();
     }
-
-    public void startService(){
-        Intent connectionIntent = new Intent(this, ConnectionService.class);
-        bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
-
-    }
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
-            connectionServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            connectionServiceBound = false;
-        }
-    };
 
 }

@@ -1,16 +1,12 @@
 package pl.dp.rasbot;
 
 import android.app.Dialog;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.view.Window;
 import android.view.WindowManager;
@@ -38,7 +34,7 @@ import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RobotActivity {
 
     @BindView(R.id.rlMainActivityContainer)
     RelativeLayout containerRelativeLayout;
@@ -69,8 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private Snackbar snackbar;
 
 
-    private ConnectionService connectionService;
-    private boolean connectionServiceBound = false;
 
     /**
      * Show progress of searching network
@@ -119,25 +113,14 @@ public class MainActivity extends AppCompatActivity {
             Timber.d("MainActivity:setWifiStatusTextView: text: " +  textToDisplay);
 
             wifiStatusTextView.setText(Html.fromHtml(textToDisplay));
-
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        BusProvider.getInstance().register(this);
-    }
 
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (connectionServiceBound) {
-            unbindService(serviceConnection);
-            connectionServiceBound = false;
-        }
-
         compositeSubscription.clear();
     }
 
@@ -246,30 +229,5 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
 
-        BusProvider.getInstance().unregister(this);
-    }
-
-    public void startService() {
-        Intent connectionIntent = new Intent(this, ConnectionService.class);
-        bindService(connectionIntent, serviceConnection, BIND_AUTO_CREATE);
-        startService(connectionIntent);
-
-    }
-
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
-            connectionServiceBound = true;
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            connectionServiceBound = false;
-        }
-    };
 }
