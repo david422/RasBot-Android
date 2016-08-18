@@ -25,4 +25,9 @@ public class ReceivedMessage{
     public Object getObject() {
         return object;
     }
+
+    @Override
+    public String toString() {
+        return String.format("type: %s, object: %s", type, object);
+    }
 }

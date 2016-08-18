@@ -26,14 +26,21 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.squareup.otto.Subscribe;
+
+import javax.sql.ConnectionEvent;
+
 import butterknife.ButterKnife;
 import butterknife.BindView;
 import butterknife.OnClick;
 import pl.dp.rasbot.customview.Slider;
+import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.message.LeftControl;
 import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
 import pl.dp.rasbot.utils.AnimatorHelper;
+import pl.dp.rasbot.utils.BusProvider;
 import timber.log.Timber;
 
 /**
@@ -79,13 +86,13 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
 
     private RelativeLayout.LayoutParams originaParams;
 
+    private Dialog connectionInterruptedDialog;
+    private Dialog connectingDialog;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.sterring_activity);
@@ -105,6 +112,8 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
         sh.addCallback(this);
 
         startService();
+
+        BusProvider.getInstance().register(this);
     }
 
     @Override
@@ -126,6 +135,47 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
             unbindService(serviceConnection);
             connectionServiceBound = false;
         }
+        BusProvider.getInstance().unregister(this);
+    }
+
+    @Subscribe
+    public void connectionStatus(ConnectionStatusEvent event){
+        switch (event.getStatus()){
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
+            case ConnectionStatusEvent.CONNECTION_ERROR:
+            case ConnectionStatusEvent.CONNECTION_TIMEOUT:
+            case ConnectionStatusEvent.CONNECTION_INTERRUPTED:
+                connectionInterruptedDialog = new AlertDialog.Builder(this)
+                        .setTitle(R.string.connection_with_robot_has_been_interrupted)
+                        .setMessage(R.string.choose_action)
+                        .setCancelable(false)
+                        .setPositiveButton(R.string.connect_again, (dialogInterface, i) -> {
+                            connectionService.connect();
+                            dialogInterface.dismiss();
+                            buildWaitDialog();
+                        })
+                        .setNegativeButton(R.string.exit, (dialogInterface1, i1) -> finish())
+                        .create();
+                connectionInterruptedDialog.show();
+                break;
+            case ConnectionStatusEvent.CONNECTION_ESTABLISHED:
+                if (connectingDialog != null && connectingDialog.isShowing()){
+                    connectingDialog.dismiss();
+                }
+
+                streamingManager.refresh();
+                break;
+        }
+    }
+
+    private void buildWaitDialog() {
+        connectingDialog = new MaterialDialog.Builder(this)
+                .title(getString(R.string.please_wait))
+                .content(getString(R.string.connecting))
+                .progress(true, 0)
+                .cancelable(false)
+                .build();
+        connectingDialog.show();
     }
 
     Slider.OnSliderValueChanged onLeftSliderChanged = new Slider.OnSliderValueChanged() {
@@ -169,17 +219,19 @@ public class SterringActivity extends FragmentActivity implements SurfaceHolder.
         float scale;
         int settingTranslation;
 
+        Timber.d("SterringActivity:settings: ");
         if (settingEnabled){
 
-            if (settingsFragment.isSettingsChanged()){
-                Dialog askDialog = new AlertDialog.Builder(this)
-                        .setTitle("Ustawienia nie zostały zapisane")
-                        .setMessage("Czy chcesz zapisać ustawienia?")
-                        .setPositiveButton("Tak", (dialogInterface, i) -> {
+            Timber.d("SterringActivity:settings: fragment setting changed: " + settingsFragment.isSettingsChanged());
+            if (settingsFragment.isSettingsChanged()){new AlertDialog.Builder(this)
+                        .setTitle(R.string.settings_have_not_been_saved)
+                        .setMessage(R.string.do_you_want_save_your_settings)
+                        .setPositiveButton(R.string.yes, (dialogInterface, i) -> {
                             settingsFragment.saveSettings();
+                            settingsFragment.setOnCloseListener(() -> settings());
                             dialogInterface.dismiss();
                         })
-                        .setNegativeButton("Nie", (dialogInterface, i) -> {
+                        .setNegativeButton(R.string.no, (dialogInterface, i) -> {
                             settingsFragment.resetSettings();
                             settings();
                             dialogInterface.dismiss();

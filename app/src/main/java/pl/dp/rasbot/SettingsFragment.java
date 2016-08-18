@@ -1,10 +1,12 @@
 package pl.dp.rasbot;
 
 import android.app.Dialog;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.squareup.otto.Subscribe;
@@ -40,6 +42,7 @@ public class SettingsFragment extends PreferenceFragment {
     private Camera1Message camera1Message;
 
     private Dialog waitDialog;
+    private SharedPreferences prefs;
 
     public void setConnectionService(ConnectionService connectionService) {
         this.connectionService = connectionService;
@@ -49,7 +52,13 @@ public class SettingsFragment extends PreferenceFragment {
         this.streamingManager = streamingManager;
     }
 
+    private boolean closeOnSaved;
+
     private boolean settingsChanged;
+
+    private Camera1Message defaultSettings;
+
+    private SaveOnCloseListener onCloseListener;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -80,9 +89,25 @@ public class SettingsFragment extends PreferenceFragment {
                 .progress(true, 0)
                 .cancelable(false)
                 .build();
+        prepareDefaultSettings();
 
     }
 
+    public void setOnCloseListener(SaveOnCloseListener onCloseListener) {
+        this.onCloseListener = onCloseListener;
+    }
+
+    private void prepareDefaultSettings(){
+        prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+
+        defaultSettings = new Camera1Message();
+
+        defaultSettings.setResolution(prefs.getString(PREF_KEY_CAMERA_RESOLUTION, getResources().getStringArray(R.array.camera_resolution_values)[0]));
+        defaultSettings.setFps(prefs.getInt(PREF_KEY_CAMERA_FPS, 25));
+        defaultSettings.setBrightness(prefs.getInt(PREF_KEY_CAMERA_BRIGHTNESS, 60));
+        defaultSettings.setFlipHorizontal(prefs.getBoolean(PREF_KEY_CAMERA_FLIP_HORIZONTAL, true));
+        defaultSettings.setFlipVertical(prefs.getBoolean(PREF_KEY_CAMERA_FLIP_VERTICAL, true));
+    }
 
 
     @Override
@@ -99,6 +124,12 @@ public class SettingsFragment extends PreferenceFragment {
             streamingManager.refresh();
             waitDialog.dismiss();
             settingsChanged = false;
+
+            if (closeOnSaved && onCloseListener != null){
+                closeOnSaved = false;
+                onCloseListener.onClose();
+
+            }
         }, 2000);
     }
 
@@ -139,10 +170,30 @@ public class SettingsFragment extends PreferenceFragment {
     }
 
     public void saveSettings() {
+        closeOnSaved = true;
+        if (connectionService != null && streamingManager != null){
+            connectionService.sendMessage(camera1Message);
+            waitDialog.show();
+        }
 
     }
 
     public void resetSettings() {
         settingsChanged = false;
+
+
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putString(PREF_KEY_CAMERA_RESOLUTION, defaultSettings.getResolution());
+        editor.putInt(PREF_KEY_CAMERA_FPS, defaultSettings.getFps());
+        editor.putInt(PREF_KEY_CAMERA_BRIGHTNESS, defaultSettings.getBrightness());
+        editor.putBoolean(PREF_KEY_CAMERA_FLIP_VERTICAL, defaultSettings.isFlipVertical());
+        editor.putBoolean(PREF_KEY_CAMERA_FLIP_HORIZONTAL, defaultSettings.isFlipHorizontal());
+
+        editor.apply();
+    }
+
+    public interface SaveOnCloseListener{
+        void onClose();
     }
 }

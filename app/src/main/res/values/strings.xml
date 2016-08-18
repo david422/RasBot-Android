@@ -46,5 +46,13 @@
     <string name="found">Znaleziono</string>
     <string name="not_connected">Nie połączono</string>
     <string name="connected">Połączono</string>
+    <string name="settings_have_not_been_saved">Ustawienia nie zostały zapisane</string>
+    <string name="do_you_want_save_your_settings">Czy chcesz zapisać ustawienia?</string>
+    <string name="yes">Tak</string>
+    <string name="no">Nie</string>
+    <string name="choose_action">Wybierz akcję</string>
+    <string name="connect_again">Połącz ponownie</string>
+    <string name="exit">Wyjdź</string>
+    <string name="connection_with_robot_has_been_interrupted">Połączenie z robotem zostało przerwane</string>
 
 </resources>
