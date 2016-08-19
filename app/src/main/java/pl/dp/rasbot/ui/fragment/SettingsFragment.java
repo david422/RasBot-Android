@@ -1,4 +1,4 @@
-package pl.dp.rasbot;
+package pl.dp.rasbot.ui.fragment;
 
 import android.app.Dialog;
 import android.content.SharedPreferences;
@@ -11,6 +11,8 @@ import android.preference.PreferenceManager;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.squareup.otto.Subscribe;
 
+import pl.dp.rasbot.ConnectionService;
+import pl.dp.rasbot.R;
 import pl.dp.rasbot.event.MessageEvent;
 import pl.dp.rasbot.message.camera.Camera1Message;
 import pl.dp.rasbot.preference.PreferencePicker;

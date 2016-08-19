@@ -4,15 +4,58 @@
     android:layout_height="match_parent"
     android:padding="10dp">
 
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/author"
+        android:text="@string/app_name_extended"
         android:gravity="center"
         android:textSize="20sp"
         android:textColor="@android:color/black"
         android:textStyle="bold"
         android:layout_marginBottom="20dp"/>
+
+    <TableLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TableRow>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/author_title"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/author_value"
+                android:textColor="@android:color/black"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/version_title"
+                android:gravity="center"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:layout_marginBottom="20dp"/>
+
+            <TextView
+                android:id="@+id/tvAboutDialogVersion"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="v 1.0"
+                android:textColor="@android:color/black"
+                android:layout_marginBottom="20dp"/>
+        </TableRow>
+
+    </TableLayout>
+
 
     <TextView
         android:layout_width="match_parent"
@@ -26,4 +69,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:src="@drawable/rasbot"/>
+    
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/code"
+        android:autoLink="web"/>
+
 </LinearLayout>

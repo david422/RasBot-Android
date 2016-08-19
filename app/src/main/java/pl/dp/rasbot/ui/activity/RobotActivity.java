@@ -1,4 +1,4 @@
-package pl.dp.rasbot;
+package pl.dp.rasbot.ui.activity;
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -10,6 +10,8 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
+import pl.dp.rasbot.ConnectionService;
+import pl.dp.rasbot.R;
 import pl.dp.rasbot.connection.PingCallback;
 import pl.dp.rasbot.connection.wifi.WifiConnectionListener;
 import pl.dp.rasbot.utils.BusProvider;

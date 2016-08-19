@@ -1,4 +1,4 @@
-package pl.dp.rasbot;
+package pl.dp.rasbot.ui.activity;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
@@ -7,14 +7,8 @@ import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentTransaction;
-import android.content.ComponentName;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 
-import android.support.v4.app.FragmentActivity;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -29,18 +23,17 @@ import android.widget.TextView;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.squareup.otto.Subscribe;
 
-import javax.sql.ConnectionEvent;
-
 import butterknife.ButterKnife;
 import butterknife.BindView;
 import butterknife.OnClick;
+import pl.dp.rasbot.R;
 import pl.dp.rasbot.customview.Slider;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.message.LeftControl;
 import pl.dp.rasbot.message.RightControl;
 import pl.dp.rasbot.streaming.StreamingManager;
+import pl.dp.rasbot.ui.fragment.SettingsFragment;
 import pl.dp.rasbot.utils.AnimatorHelper;
-import pl.dp.rasbot.utils.BusProvider;
 import timber.log.Timber;
 
 /**
@@ -52,29 +45,29 @@ import timber.log.Timber;
 public class SterringActivity extends RobotActivity implements SurfaceHolder.Callback{
 
     @BindView(R.id.sSterringActivityLeftSlider)
-    Slider mLeftSlider;
+    public Slider mLeftSlider;
     @BindView(R.id.sSterringActivityRightSlider)
-    Slider mRightSlider;
+    public Slider mRightSlider;
     @BindView(R.id.tvSterringActivityLeftValue)
-    TextView mLeftValueTextView;
+    public TextView mLeftValueTextView;
     @BindView(R.id.tvSterringActivityRightValue)
-    TextView mRightValueTextView;
+    public TextView mRightValueTextView;
 
     @BindView(R.id.bSterringActivityPlay)
-    Button runCameraButton;
+    public Button runCameraButton;
 
     @BindView(R.id.bSterringActivitySettings)
-    Button settingsButton;
+    public Button settingsButton;
 
 
     @BindView(R.id.surfView)
-    SurfaceView mSurfaceView;
+    public SurfaceView mSurfaceView;
 
     @BindView(R.id.rlSteeringActivityCameraView)
-    RelativeLayout cameraViewRelativeLayout;
+    public RelativeLayout cameraViewRelativeLayout;
 
     @BindView(R.id.fragmentTest)
-    FrameLayout settingsFrameLayout;
+    public FrameLayout settingsFrameLayout;
 
     private StreamingManager streamingManager;
 
@@ -108,19 +101,6 @@ public class SterringActivity extends RobotActivity implements SurfaceHolder.Cal
         SurfaceHolder sh = mSurfaceView.getHolder();
         sh.addCallback(this);
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-    }
-
 
     @Subscribe
     public void connectionStatus(ConnectionStatusEvent event){

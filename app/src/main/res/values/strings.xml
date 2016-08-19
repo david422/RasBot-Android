@@ -13,7 +13,7 @@
     <string name="go_to_sterring">Steruj robotem</string>
     <string name="about">O aplikacji</string>
     <string name="application_is_already_connectes">Aplikacja jest aktualnie połączona</string>
-    <string name="author">Autor: Dawid Podolak</string>
+    <string name="author_title">Autor: </string>
     <string name="about_text">Dzięki tej aplikacji, możesz sterować mobilnym robotem kołowym, który został opracowany
     na potrzeby pracy magisterskiej pt. \"Wykorzystanie mikrokomputera Raspberry PI w mobilnym robocie kołowym.\"\n
     </string>
@@ -54,5 +54,9 @@
     <string name="connect_again">Połącz ponownie</string>
     <string name="exit">Wyjdź</string>
     <string name="connection_with_robot_has_been_interrupted">Połączenie z robotem zostało przerwane</string>
+    <string name="author_value">Dawid Podolak</string>
+    <string name="version_title">Wersja:</string>
+    <string name="app_name_extended">RasBot Android</string>
+    <string name="code">Jeśli chciałbyś zajrzeć do kodu, to zapraszam do repozytorium na githubie.\nAndroid: https://github.com/david422/Rasbot-Android \nRobot: https://github.com/david422/RasbotRPI</string>
 
 </resources>

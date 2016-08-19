@@ -1,12 +1,16 @@
-package pl.dp.rasbot;
+package pl.dp.rasbot.ui.activity;
 
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -23,6 +27,8 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import pl.dp.rasbot.R;
+import pl.dp.rasbot.ui.fragment.SettingsFragment;
 import pl.dp.rasbot.event.ConnectionStatusEvent;
 import pl.dp.rasbot.event.MessageEvent;
 import pl.dp.rasbot.message.camera.Camera1Message;
@@ -35,30 +41,30 @@ import timber.log.Timber;
 public class MainActivity extends RobotActivity {
 
     @BindView(R.id.rlMainActivityContainer)
-    RelativeLayout containerRelativeLayout;
+    public RelativeLayout containerRelativeLayout;
     @BindView(R.id.tvMainActivityWifiStatus)
-    TextView wifiStatusTextView;
+    public  TextView wifiStatusTextView;
     @BindView(R.id.tvMainActivityRobotStatus)
-    TextView robotStatusTextView;
+    public TextView robotStatusTextView;
     private CompositeSubscription compositeSubscription = new CompositeSubscription();
 
     @BindView(R.id.tvMainActivityStatus)
-    TextView mStatusTextView;
+    public TextView mStatusTextView;
 
     @BindView(R.id.bMianActivitySterring)
-    Button mSterringButton;
+    public Button mSterringButton;
 
     @BindView(R.id.bMainActivityConnectToServer)
-    Button mConnectingButton;
+    public Button mConnectingButton;
 
     @BindView(R.id.bMainActivityAbout)
-    Button mAboutButton;
+    public Button mAboutButton;
 
     @BindView(R.id.tvMainActivityConnectionStatus)
-    TextView mConnectionStatus;
+    public TextView mConnectionStatus;
 
     @BindView(R.id.sConnectionProgressBar)
-    ProgressBar progressBarCircularIndeterminate;
+    public ProgressBar progressBarCircularIndeterminate;
 
 
 
@@ -70,7 +76,7 @@ public class MainActivity extends RobotActivity {
 
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -116,7 +122,7 @@ public class MainActivity extends RobotActivity {
 
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         compositeSubscription.clear();
     }
@@ -211,9 +217,21 @@ public class MainActivity extends RobotActivity {
 
     @OnClick(R.id.bMainActivityAbout)
     public void about() {
+
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View dialogView  = layoutInflater.inflate(R.layout.about_dialog, null);
+        TextView version = (TextView) dialogView.findViewById(R.id.tvAboutDialogVersion);
+
+        try {
+            PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            version.setText(String.format(" v%s", packageInfo.versionName));
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
         new MaterialDialog.Builder(this)
                 .title(R.string.about_title)
-                .customView(R.layout.about_dialog, true)
+                .customView(dialogView, true)
                 .positiveText(R.string.close)
                 .show();
 
