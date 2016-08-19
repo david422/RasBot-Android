@@ -106,6 +106,7 @@ public class SterringActivity extends RobotActivity implements SurfaceHolder.Cal
     public void connectionStatus(ConnectionStatusEvent event){
         switch (event.getStatus()){
             case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_NOT_FOUND:
+            case ConnectionStatusEvent.RASBOT_WIFI_NETWORK_DISCONNECTED:
             case ConnectionStatusEvent.CONNECTION_ERROR:
             case ConnectionStatusEvent.CONNECTION_TIMEOUT:
             case ConnectionStatusEvent.CONNECTION_INTERRUPTED:

@@ -42,12 +42,15 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
         if (connectionServiceBound) {
             unbindService(serviceConnection);
             connectionServiceBound = false;
+            connectionService.removePingCallback(RobotActivity.this);
+            connectionService.removeWifiConnectionListener(RobotActivity.this);
         }
         BusProvider.getInstance().unregister(this);
+        super.onDestroy();
     }
 
     public void startService() {
@@ -62,6 +65,7 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             connectionService = ((ConnectionService.LocalBinder) iBinder).getService();
             connectionServiceBound = true;
+            Timber.d("RobotActivity:onServiceConnected: add callbacks");
             connectionService.addPingCallback(RobotActivity.this);
             connectionService.addWifiConnectionListener(RobotActivity.this);
         }
@@ -69,8 +73,6 @@ public class RobotActivity extends AppCompatActivity implements WifiConnectionLi
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             connectionServiceBound = false;
-            connectionService.removePingCallback(RobotActivity.this);
-            connectionService.removeWifiConnectionListener(RobotActivity.this);
         }
     };
 

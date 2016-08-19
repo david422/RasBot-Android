@@ -119,8 +119,6 @@ public class PingManager implements PingCommandCallback {
             pingSubscription.unsubscribe();
         }
 
-
-
         try {
             pingSocket.close();
         } catch (IOException e) {
